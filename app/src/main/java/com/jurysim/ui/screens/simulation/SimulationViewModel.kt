@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import kotlin.text.MatchResult
 
 class SimulationViewModel(
@@ -207,48 +208,50 @@ class SimulationViewModel(
                 defendantName = _state.value.defendantName
             )
 
-            val prosecutionResult = ollamaRepository.generate(selectedModel, prosecutionPrompt)
+            // Defense opening
+            val defensePrompt = PromptTemplates.openingStatement(
+                side = "Defense",
+                caseDescription = _state.value.caseDescription,
+                charges = _state.value.charges,
+                defendantName = _state.value.defendantName
+            )
 
-            prosecutionResult.onSuccess { response ->
-                val message = Message(
-                    content = response,
-                    isUser = false,
-                    speaker = "Prosecutor"
-                )
-                _state.value = _state.value.copy(
-                    messages = _state.value.messages + message
-                )
+            try {
+                // Run generations in parallel to save time
+                val prosecutionDeferred = async { ollamaRepository.generate(selectedModel, prosecutionPrompt) }
+                val defenseDeferred = async { ollamaRepository.generate(selectedModel, defensePrompt) }
 
-                // Defense opening
-                val defensePrompt = PromptTemplates.openingStatement(
-                    side = "Defense",
-                    caseDescription = _state.value.caseDescription,
-                    charges = _state.value.charges,
-                    defendantName = _state.value.defendantName
-                )
+                val prosecutionResult = prosecutionDeferred.await()
+                val defenseResult = defenseDeferred.await()
 
-                val defenseResult = ollamaRepository.generate(selectedModel, defensePrompt)
+                val newMessages = mutableListOf<Message>()
 
-                defenseResult.onSuccess { defenseResponse ->
-                    val defenseMessage = Message(
-                        content = defenseResponse,
-                        isUser = false,
-                        speaker = "Defense Attorney"
-                    )
-                    _state.value = _state.value.copy(
-                        messages = _state.value.messages + defenseMessage,
-                        isLoading = false
-                    )
-                }.onFailure { error ->
+                prosecutionResult.onSuccess { response ->
+                    newMessages.add(Message(content = response, isUser = false, speaker = "Prosecutor"))
+                }.onFailure {
+                    // Log error but continue if possible?
+                }
+
+                defenseResult.onSuccess { response ->
+                    newMessages.add(Message(content = response, isUser = false, speaker = "Defense Attorney"))
+                }
+
+                if (newMessages.isEmpty()) {
+                    val error = prosecutionResult.exceptionOrNull()?.message ?: defenseResult.exceptionOrNull()?.message ?: "Failed to generate statements"
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = error
+                    )
+                } else {
+                    _state.value = _state.value.copy(
+                        messages = newMessages,
+                        isLoading = false
                     )
                 }
-            }.onFailure { error ->
+            } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    error = error.message
+                    error = e.message
                 )
             }
         }
@@ -373,48 +376,48 @@ class SimulationViewModel(
                 charges = _state.value.charges
             )
 
-            val prosecutionResult = ollamaRepository.generate(selectedModel, prosecutionPrompt)
+            // Defense closing
+            val defensePrompt = PromptTemplates.closingArgument(
+                side = "Defense",
+                caseDescription = _state.value.caseDescription,
+                defendantName = _state.value.defendantName,
+                charges = _state.value.charges
+            )
 
-            prosecutionResult.onSuccess { response ->
-                val message = Message(
-                    content = response,
-                    isUser = false,
-                    speaker = "Prosecutor"
-                )
-                _state.value = _state.value.copy(
-                    messages = _state.value.messages + message
-                )
+            try {
+                // Run generations in parallel
+                val prosecutionDeferred = async { ollamaRepository.generate(selectedModel, prosecutionPrompt) }
+                val defenseDeferred = async { ollamaRepository.generate(selectedModel, defensePrompt) }
 
-                // Defense closing
-                val defensePrompt = PromptTemplates.closingArgument(
-                    side = "Defense",
-                    caseDescription = _state.value.caseDescription,
-                    defendantName = _state.value.defendantName,
-                    charges = _state.value.charges
-                )
+                val prosecutionResult = prosecutionDeferred.await()
+                val defenseResult = defenseDeferred.await()
 
-                val defenseResult = ollamaRepository.generate(selectedModel, defensePrompt)
+                val newMessages = mutableListOf<Message>()
 
-                defenseResult.onSuccess { defenseResponse ->
-                    val defenseMessage = Message(
-                        content = defenseResponse,
-                        isUser = false,
-                        speaker = "Defense Attorney"
-                    )
-                    _state.value = _state.value.copy(
-                        messages = _state.value.messages + defenseMessage,
-                        isLoading = false
-                    )
-                }.onFailure { error ->
+                prosecutionResult.onSuccess { response ->
+                    newMessages.add(Message(content = response, isUser = false, speaker = "Prosecutor"))
+                }
+
+                defenseResult.onSuccess { response ->
+                    newMessages.add(Message(content = response, isUser = false, speaker = "Defense Attorney"))
+                }
+
+                if (newMessages.isEmpty()) {
+                    val error = prosecutionResult.exceptionOrNull()?.message ?: defenseResult.exceptionOrNull()?.message ?: "Failed to generate closing arguments"
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = error
+                    )
+                } else {
+                    _state.value = _state.value.copy(
+                        messages = _state.value.messages + newMessages,
+                        isLoading = false
                     )
                 }
-            }.onFailure { error ->
+            } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    error = error.message
+                    error = e.message
                 )
             }
         }
