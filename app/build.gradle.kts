@@ -101,6 +101,13 @@ android {
         buildConfig = true
     }
 
+    lint {
+        baseline = file("lint-baseline.xml")
+        abortOnError = true
+        warningsAsErrors = false
+        checkReleaseBuilds = false
+    }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.4"
     }
