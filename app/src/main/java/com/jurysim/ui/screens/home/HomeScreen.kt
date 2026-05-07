@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,16 +47,20 @@ fun HomeScreen(
             )
         }
     ) { padding ->
-        Column(
+        AdaptiveCenteredContent(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(24.dp)
-                .navigationBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .navigationBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // App icon/title
@@ -104,14 +109,14 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Menu options
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInVertically(
-                    animationSpec = tween(800, delayMillis = 600),
-                    initialOffsetY = { it }
-                ) + fadeIn(animationSpec = tween(800, delayMillis = 600))
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = slideInVertically(
+                        animationSpec = tween(800, delayMillis = 600),
+                        initialOffsetY = { it }
+                    ) + fadeIn(animationSpec = tween(800, delayMillis = 600))
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     MenuCard(
                         title = "New Case",
                         description = "Begin a new jury duty simulation",
@@ -140,6 +145,7 @@ fun HomeScreen(
                         onClick = onSettings
                     )
                 }
+            }
             }
         }
     }

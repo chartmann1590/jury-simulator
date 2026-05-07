@@ -11,10 +11,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
+import com.jurysim.ui.audio.ChatTtsPlayer
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 import com.jurysim.ui.components.ChatBubble
 import com.jurysim.ui.components.LoadingIndicator
 import com.jurysim.ui.components.PhaseIndicator
@@ -28,9 +31,15 @@ fun VoirDireScreen(
     onDismissed: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
     var userInput by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val ttsPlayer = remember { ChatTtsPlayer(context) }
+
+    DisposableEffect(Unit) {
+        onDispose { ttsPlayer.release() }
+    }
 
     LaunchedEffect(state.messages.size) {
         if (state.messages.isNotEmpty()) {
@@ -46,12 +55,19 @@ fun VoirDireScreen(
         }
     }
 
-    Column(
+    LaunchedEffect(state.isJuryDismissed) {
+        if (state.isJuryDismissed) {
+            onDismissed()
+        }
+    }
+
+    AdaptiveCenteredContent(
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
     ) {
-        PhaseIndicator(currentPhase = state.currentPhase)
+        Column(modifier = Modifier.fillMaxSize()) {
+            PhaseIndicator(currentPhase = state.currentPhase)
 
         LazyColumn(
             modifier = Modifier
@@ -67,7 +83,17 @@ fun VoirDireScreen(
                     enter = fadeIn() + slideInVertically(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    ChatBubble(message = message)
+                    ChatBubble(
+                        message = message,
+                        showPlayButton = state.ttsEnabled && !message.isUser,
+                        onPlayClick = { selected ->
+                            ttsPlayer.speak(
+                                selected,
+                                judgeGender = state.judgeGender,
+                                judgeVoiceSeed = state.judgeVoiceSeed
+                            )
+                        }
+                    )
                 }
             }
 
@@ -111,30 +137,32 @@ fun VoirDireScreen(
         }
 
         // Input area - now with proper keyboard handling
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 3.dp,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .navigationBarsPadding(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.Bottom
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 3.dp,
+                modifier = Modifier.fillMaxWidth()
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .navigationBarsPadding(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                val canRespond = !state.isLoading && !state.isJurySelected && !state.isJuryDismissed
+
                 OutlinedTextField(
                     value = userInput,
                     onValueChange = { userInput = it },
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("Your answer...") },
-                    enabled = !state.isLoading,
+                    enabled = canRespond,
                     shape = MaterialTheme.shapes.large,
                     maxLines = 4
                 )
 
-                if (!state.isLoading && userInput.isNotBlank()) {
+                if (canRespond && userInput.isNotBlank()) {
                     FloatingActionButton(
                         onClick = {
                             viewModel.respondToVoirDire(userInput)
@@ -161,6 +189,7 @@ fun VoirDireScreen(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
                 }
             }
         }

@@ -1,8 +1,45 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 }
+
+val localProperties = Properties().apply {
+    val localPropsFile = rootProject.file("local.properties")
+    if (localPropsFile.exists()) {
+        localPropsFile.inputStream().use { load(it) }
+    }
+}
+
+fun requireLocalProperty(key: String): String {
+    return localProperties.getProperty(key)
+        ?: throw GradleException("Missing required local.properties key: $key")
+}
+
+val admobAppId = requireLocalProperty("admob.app.id")
+val admobBannerId = requireLocalProperty("admob.banner.id")
+val admobInterstitialId = requireLocalProperty("admob.interstitial.id")
+
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) {
+        keystorePropsFile.inputStream().use { load(it) }
+    }
+}
+
+fun signingValue(envKey: String, propKey: String): String? =
+    System.getenv(envKey)?.takeIf { it.isNotBlank() }
+        ?: keystoreProps.getProperty(propKey)?.takeIf { it.isNotBlank() }
+
+val signingStoreFile = signingValue("SIGNING_KEY_STORE_FILE", "storeFile")
+val signingStorePassword = signingValue("SIGNING_KEY_STORE_PASSWORD", "storePassword")
+val signingKeyAlias = signingValue("SIGNING_KEY_ALIAS", "keyAlias")
+val signingKeyPassword = signingValue("SIGNING_KEY_ALIAS_PASSWORD", "keyPassword")
+val hasReleaseSigning = listOf(
+    signingStoreFile, signingStorePassword, signingKeyAlias, signingKeyPassword
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.jurysim"
@@ -12,11 +49,25 @@ android {
         applicationId = "com.jurysim"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+        versionName = System.getenv("VERSION_NAME") ?: "1.0"
+        manifestPlaceholders["ADMOB_APP_ID"] = admobAppId
+        buildConfigField("String", "ADMOB_BANNER_ID", "\"$admobBannerId\"")
+        buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"$admobInterstitialId\"")
 
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(signingStoreFile!!)
+                storePassword = signingStorePassword
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
+            }
         }
     }
 
@@ -27,6 +78,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -37,10 +91,14 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        // LiteRT-LM 0.10.0 ships with Kotlin 2.3 metadata; allow our 1.9.x
+        // compiler to consume it without bumping the whole toolchain.
+        freeCompilerArgs += "-Xskip-metadata-version-check"
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -48,6 +106,11 @@ android {
     }
 
     packaging {
+        jniLibs {
+            // Default (false): uncompressed .so in APK/AAB with 16 KB alignment when using AGP 8.5.1+.
+            // Do not enable legacy packaging unless you must target AGP < 8.5.1.
+            useLegacyPackaging = false
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -64,6 +127,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-window-size-class")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
@@ -77,16 +142,14 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    // OkHttp - used by ModelDownloader for streaming the .litertlm file
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Moshi
-    implementation("com.squareup.moshi:moshi:1.15.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
+    // LiteRT-LM (on-device Gemma 4 inference) — use a current release for 16 KB page-size compatible native libs.
+    implementation("com.google.ai.edge.litertlm:litertlm-android:0.11.0")
+
+    // WorkManager - foreground download worker for the 3.65 GB model
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
@@ -98,6 +161,7 @@ dependencies {
 
     // Core
     implementation("androidx.core:core-ktx:1.12.0")
+    implementation("com.google.android.gms:play-services-ads:25.2.0")
 
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

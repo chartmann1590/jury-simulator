@@ -1,0 +1,13 @@
+file 'shot1-home.png'
+duration 7
+file 'shot2-new-case.png'
+duration 7
+file 'shot3-case-generated.png'
+duration 7
+file 'shot4-voir-dire.png'
+duration 7
+file 'shot5-jury-selection.png'
+duration 7
+file 'shot6-current.png'
+duration 7
+file 'shot6-current.png'

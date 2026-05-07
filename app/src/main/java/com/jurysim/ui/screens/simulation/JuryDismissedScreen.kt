@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 
 @Composable
 fun JuryDismissedScreen(
@@ -32,68 +33,72 @@ fun JuryDismissedScreen(
         label = "scale"
     )
 
-    Column(
+    AdaptiveCenteredContent(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp)
-            .navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
-        AnimatedVisibility(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp)
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AnimatedVisibility(
             visible = true,
             enter = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn()
-        ) {
-            Icon(
+            ) {
+                Icon(
                 Icons.Default.Close,
                 contentDescription = null,
                 modifier = Modifier
                     .size(120.dp)
                     .scale(scale),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+                )
+            }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = fadeIn(animationSpec = tween(800, delayMillis = 200))
-        ) {
-            Text(
+            ) {
+                Text(
                 text = "Not Selected",
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
-            )
-        }
+                )
+            }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = fadeIn(animationSpec = tween(800, delayMillis = 400))
-        ) {
-            Text(
+            ) {
+                Text(
                 text = "You were not selected to serve on this jury",
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+                )
+            }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = slideInVertically(
                 animationSpec = tween(800, delayMillis = 600),
                 initialOffsetY = { it }
             ) + fadeIn(animationSpec = tween(800, delayMillis = 600))
-        ) {
-            Card(
+            ) {
+                Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -113,22 +118,23 @@ fun JuryDismissedScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                }
             }
-        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = fadeIn(animationSpec = tween(800, delayMillis = 800))
-        ) {
-            Button(
+            ) {
+                Button(
                 onClick = onRetry,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("Try Another Case", style = MaterialTheme.typography.titleMedium)
+                    .heightIn(min = 56.dp)
+                ) {
+                    Text("Try Another Case", style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }

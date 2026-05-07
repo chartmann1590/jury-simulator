@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,21 +45,25 @@ fun JurorProfileScreen(
             )
         }
     ) { padding ->
-        Column(
+        AdaptiveCenteredContent(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
                 .navigationBarsPadding()
-                .verticalScroll(scrollState)
                 .padding(padding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Your profile information will be used to make the simulation more realistic and personalized.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Your profile information will be used to make the simulation more realistic and personalized.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -215,7 +220,7 @@ fun JurorProfileScreen(
                         placeholder = { Text("Any other relevant information...") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp),
+                            .heightIn(min = 120.dp),
                         maxLines = 5,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
@@ -237,6 +242,7 @@ fun JurorProfileScreen(
 
             // Extra bottom spacing to ensure content is visible above keyboard
             Spacer(modifier = Modifier.height(100.dp))
+            }
         }
     }
 }

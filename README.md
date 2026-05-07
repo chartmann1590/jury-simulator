@@ -1,180 +1,95 @@
+<div align="center">
+
+<img src="play-store/graphics/icon-512.png" alt="Jury Simulator" width="120" />
+
 # Jury Simulator
 
-Jury Simulator is an Android application that provides an immersive simulation of the jury duty experience. Using AI-powered conversations and realistic trial scenarios, users can experience the legal process from the perspective of a juror, participating in voir dire, witnessing trials, and engaging in deliberations with AI-controlled jurors.
+**Decide justice from your phone.**
 
-## Table of Contents
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Architecture](#architecture)
-- [AI Integration](#ai-integration)
-- [Contributing](#contributing)
-- [License](#license)
-- [Security](#security)
+Step into the jury box for AI-generated criminal trials. Voir dire, witnesses, evidence, deliberation, verdict — the whole process, every time.
 
-## Features
+[Website](https://chartmann1590.github.io/jury-simulator/) · [Download APK](https://github.com/chartmann1590/jury-simulator/releases/latest) · [Privacy](https://chartmann1590.github.io/jury-simulator/privacy.html) · [Support](https://chartmann1590.github.io/jury-simulator/support.html)
 
-- **Realistic Trial Simulation**: Experience the complete jury duty process from selection to verdict
-- **AI-Powered Interactions**: Engage with AI-generated judges, attorneys, witnesses, and fellow jurors
-- **Dynamic Case Generation**: Each trial presents unique scenarios with different defendants, charges, and evidence
-- **Interactive Voir Dire**: Participate in jury selection with realistic questioning
-- **Witness Testimony**: Listen to and question witnesses during the trial
-- **Evidence Presentation**: Review physical evidence relevant to the case
-- **Deliberation Phase**: Discuss the case with 11 AI jurors, each with unique personalities and biases
-- **Individual Juror Chat**: Have private conversations with specific jurors during deliberations
-- **Note-Taking System**: Record observations and thoughts during the trial
-- **Case History**: Track and review past simulated cases
-- **Customizable Juror Profile**: Personalize your juror identity
+</div>
 
-## Technology Stack
+---
 
-- **Platform**: Android (API Level 26+)
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose
-- **Architecture**: MVVM (Model-View-ViewModel)
-- **AI Integration**: Ollama API
-- **Database**: Room (SQLite)
-- **Preferences**: DataStore
-- **Networking**: Retrofit, OkHttp, Moshi
-- **Build System**: Gradle (Kotlin DSL)
+## What it is
 
-## Installation
+Jury Simulator is a free Android app that puts you in the jury box for AI-generated trials. You'll move through voir dire, sit through witness testimony, weigh the evidence, deliberate with eleven AI jurors, and cast the vote that decides the case.
 
-### Prerequisites
+Every case is generated fresh — different defendant, different charges, different witnesses — so no two sessions play out the same way. The AI runs **on your device**: after a one-time model download, every trial is generated locally. Your notes and votes never leave your phone.
 
-1. **Ollama**: Install and run Ollama on your local machine or accessible server
-   - Download from [ollama.ai](https://ollama.ai)
-   - Pull a model: `ollama pull llama3` or similar
+There's no account, no email, no paywall. A small banner ad and an occasional interstitial keep the lights on.
 
-2. **Android Environment**:
-   - Android Studio (latest version recommended)
-   - Android SDK with API Level 26+
+## What's in the courtroom
 
-### Setup
+- **The full trial flow** — voir dire, opening statements, witnesses, evidence, closing arguments, deliberation, verdict. Nothing skipped.
+- **Eleven AI jurors with hidden biases** — every juror has a profession, a personality, and a private leaning. Some you can sway. Some you can't.
+- **Private one-on-ones** — talk to the room or pull a single juror aside in chambers before the next vote.
+- **Up to five rounds of voting** — unanimous or you hang the jury.
+- **A notebook that earns its keep** — track contradictions, evidence, and witness inconsistencies as the trial unfolds.
+- **Case history** — revisit decisions you regret.
+- **Customizable juror profile.**
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/jury-simulator.git
-   cd jury-simulator
-   ```
+## Screenshots
 
-2. Open the project in Android Studio
+<div align="center">
 
-3. Build the project:
-   ```bash
-   ./gradlew build
-   ```
+<img src="play-store/graphics/screenshots/01-home.png" alt="Home" width="180" />
+<img src="play-store/graphics/screenshots/02-new-case.png" alt="New Case" width="180" />
+<img src="play-store/graphics/screenshots/03-case-intro.png" alt="Case intro" width="180" />
 
-4. Install on your device/emulator:
-   ```bash
-   ./gradlew installDebug
-   ```
+<img src="play-store/graphics/screenshots/04-voir-dire.png" alt="Voir dire" width="180" />
+<img src="play-store/graphics/screenshots/05-jury-selection.png" alt="Jury selected" width="180" />
+<img src="play-store/graphics/screenshots/06-additional.png" alt="Verdict" width="180" />
 
-## Usage
+</div>
 
-1. **Initial Setup**: Enter your Ollama server URL when prompted (e.g., `http://192.168.1.100:11434`)
+## Get the app
 
-2. **Select Model**: Choose an AI model from your Ollama instance
+| Source | Status |
+|---|---|
+| [GitHub Releases](https://github.com/chartmann1590/jury-simulator/releases/latest) — direct APK | ✅ Available |
+| Google Play Store | 🚧 Coming soon |
 
-3. **Jury Selection (Voir Dire)**: Answer questions from the judge to determine eligibility
+Android 8.0 (Oreo) or newer. About 4 GB of storage after the one-time model download.
 
-4. **Trial Phases**:
-   - Opening Statements
-   - Witness Testimony
-   - Evidence Presentation
-   - Closing Arguments
+## What we don't collect
 
-5. **Deliberation**: Discuss the case with AI jurors and participate in voting
+- No analytics. No Firebase, no Crashlytics, no third-party trackers.
+- No account system. We don't ask for an email.
+- No cloud storage of your gameplay — there's no server to leak.
 
-6. **Verdict**: Receive the final outcome of the trial
-
-### Customizing Your Experience
-
-- Update your juror profile in Settings
-- Adjust AI model preferences
-- Review case history from previous simulations
-
-## Architecture
-
-The application follows the MVVM (Model-View-ViewModel) architectural pattern:
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   UI Layer      │◄──►│  ViewModel Layer │◄──►│  Data Layer     │
-│ (Compose)       │    │ (State holders)  │    │ (Repositories)  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
-
-### Key Components
-
-- **MainActivity**: Single activity that hosts the Compose UI
-- **NavGraph**: Manages navigation between screens
-- **ViewModels**: Handle business logic and state management
-- **Repositories**: Abstract data sources (AI API, local storage)
-- **Models**: Define data structures and business logic
-- **Components**: Reusable UI elements
-
-### Data Flow
-
-The application uses reactive programming with StateFlow and Flow for state management:
-
-1. UI collects state from ViewModels
-2. User actions trigger ViewModel methods
-3. ViewModels update state and perform business logic
-4. Repository layers handle data operations
-5. Updated state flows back to UI
-
-## AI Integration
-
-The application integrates with Ollama to provide AI-powered trial experiences:
-
-### How It Works
-
-1. **Ollama Connection**: Connects to a local Ollama instance via REST API
-2. **Prompt Templates**: Uses carefully crafted prompts to guide AI responses
-3. **Response Parsing**: Extracts structured information from AI responses
-4. **Context Management**: Maintains conversation history for coherent interactions
-
-### Supported Models
-
-The application works with any model supported by Ollama, including:
-- Llama 3
-- Mistral
-- Gemma
-- Phi
-- And many others
-
-### Prompt Engineering
-
-The application uses specialized prompt templates for different scenarios:
-- Case generation
-- Voir dire questioning
-- Opening/closing statements
-- Witness testimony
-- Juror deliberations
-- Individual juror interactions
-
-## Contributing
-
-We welcome contributions to improve the Jury Simulator! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
-
-### Development Guidelines
-
-- Follow Android/Kotlin coding conventions
-- Maintain MVVM architecture principles
-- Write unit tests for new features
-- Update documentation as needed
-- Follow accessibility best practices
+The full privacy policy is at [chartmann1590.github.io/jury-simulator/privacy.html](https://chartmann1590.github.io/jury-simulator/privacy.html).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT. See [LICENSE](LICENSE).
 
-## Security
+---
 
-Please see our [SECURITY.md](SECURITY.md) for information about reporting security vulnerabilities.
+## For developers
 
-## Support
+Open-source under MIT. Pull requests welcome.
 
-For support, please open an issue in the GitHub repository or contact the development team.
+- **Tech**: Kotlin · Jetpack Compose · Material 3 · LiteRT-LM (on-device inference) · Room · DataStore · Google Mobile Ads
+- **Min SDK**: 26 (Android 8.0) · **Target SDK**: 35
+- **Build**: `./gradlew assembleDebug` after adding `local.properties` (see `keystore.properties.example` for shape; the AdMob keys go in `local.properties`)
+- **Architecture overview**: [`docs/architecture.md`](docs/architecture.md)
+- **Trial flow internals**: [`docs/trial_flow.md`](docs/trial_flow.md)
+- **AI integration**: [`docs/ai_integration.md`](docs/ai_integration.md)
+- **All developer docs**: [`docs/`](docs/)
+- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Security disclosures**: [SECURITY.md](SECURITY.md)
+- **Project agent guide for Claude**: [CLAUDE.md](CLAUDE.md)
+
+CI on every push runs lint and unit tests; pushes to `master` build a signed AAB + APK and publish a GitHub Release. See [`.github/workflows/`](.github/workflows/).
+
+---
+
+<div align="center">
+
+<sub>© 2026 Charles Hartmann · MIT-licensed app · <a href="https://chartmann1590.github.io/jury-simulator/">jury-simulator</a></sub>
+
+</div>

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jurysim.data.model.Fact
 import com.jurysim.data.model.FactType
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,54 +42,60 @@ fun NotebookScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            TabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = { Text(title) }
-                    )
-                }
-            }
-
-            if (selectedTab == 0) {
-                // General Notes Tab
-                Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
-                    OutlinedTextField(
-                        value = generalNotes,
-                        onValueChange = onUpdateGeneralNotes,
-                        modifier = Modifier.fillMaxSize(),
-                        placeholder = { Text("Write your general thoughts, theories, and questions here...") },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+        AdaptiveCenteredContent(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TabRow(selectedTabIndex = selectedTab) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = { Text(title) }
                         )
-                    )
-                }
-            } else {
-                val filteredFacts = when (selectedTab) {
-                    2 -> facts.filter { it.type == FactType.PERSON }
-                    3 -> facts.filter { it.type == FactType.EVIDENCE }
-                    else -> facts
+                    }
                 }
 
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (filteredFacts.isEmpty()) {
-                        item {
-                            Text(
-                                "No facts recorded in this category yet.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(16.dp)
+                if (selectedTab == 0) {
+                    // General Notes Tab
+                    Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
+                        OutlinedTextField(
+                            value = generalNotes,
+                            onValueChange = onUpdateGeneralNotes,
+                            modifier = Modifier.fillMaxSize(),
+                            placeholder = { Text("Write your general thoughts, theories, and questions here...") },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
                             )
-                        }
-                    } else {
-                        items(filteredFacts) { fact ->
-                            FactCard(fact, onUpdateFactNotes)
+                        )
+                    }
+                } else {
+                    val filteredFacts = when (selectedTab) {
+                        2 -> facts.filter { it.type == FactType.PERSON }
+                        3 -> facts.filter { it.type == FactType.EVIDENCE }
+                        else -> facts
+                    }
+
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (filteredFacts.isEmpty()) {
+                            item {
+                                Text(
+                                    "No facts recorded in this category yet.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        } else {
+                            items(filteredFacts) { fact ->
+                                FactCard(fact, onUpdateFactNotes)
+                            }
                         }
                     }
                 }

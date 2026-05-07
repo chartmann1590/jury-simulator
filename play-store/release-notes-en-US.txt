@@ -1,0 +1,6 @@
+First public release.
+
+• Full trial flow: voir dire, opening, witnesses, evidence, closing, deliberation, verdict
+• Eleven AI jurors with hidden biases
+• On-device AI — your trials never leave your phone after the one-time model download
+• Notebook, case history, customizable juror profile

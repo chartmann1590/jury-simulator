@@ -16,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.jurysim.data.local.CaseEntity
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
+import com.jurysim.ui.adaptive.AppWindowSize
+import com.jurysim.ui.adaptive.LocalAppWindowSize
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,8 +30,10 @@ fun HistoryScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val windowSize = LocalAppWindowSize.current
+    val useTwoPane = windowSize != AppWindowSize.Compact
 
-    if (uiState.selectedCase != null) {
+    if (!useTwoPane && uiState.selectedCase != null) {
         CaseDetailDialog(
             case = uiState.selectedCase!!,
             onDismiss = { viewModel.clearSelection() },
@@ -106,21 +111,128 @@ fun HistoryScreen(
                 }
             }
         } else {
-            LazyColumn(
+            AdaptiveCenteredContent(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(uiState.cases) { case ->
-                    CaseHistoryCard(
-                        case = case,
-                        onClick = { viewModel.selectCase(case) }
-                    )
+                if (useTwoPane) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(vertical = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(uiState.cases) { case ->
+                                CaseHistoryCard(
+                                    case = case,
+                                    onClick = { viewModel.selectCase(case) }
+                                )
+                            }
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        ) {
+                            if (uiState.selectedCase == null) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Select a case to view details",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                CaseDetailPane(
+                                    case = uiState.selectedCase!!,
+                                    onClose = { viewModel.clearSelection() },
+                                    onDelete = { showDeleteDialog = true }
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(uiState.cases) { case ->
+                            CaseHistoryCard(
+                                case = case,
+                                onClick = { viewModel.selectCase(case) }
+                            )
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CaseDetailPane(
+    case: CaseEntity,
+    onClose: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = case.caseTitle,
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f)
+            )
+            Row {
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+                TextButton(onClick = onClose) {
+                    Text("Close")
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        DetailSection(title = "Verdict", content = case.verdict)
+        Spacer(modifier = Modifier.height(12.dp))
+        DetailSection(title = "Defendant", content = case.defendantName)
+        Spacer(modifier = Modifier.height(12.dp))
+        DetailSection(title = "Charges", content = case.charges)
+        Spacer(modifier = Modifier.height(12.dp))
+        DetailSection(title = "Description", content = case.caseDescription)
+        Spacer(modifier = Modifier.height(12.dp))
+        DetailSection(
+            title = "Jury Status",
+            content = if (case.wasJurySelected) "Selected" else "Not Selected"
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        DetailSection(title = "AI Model", content = case.modelUsed)
     }
 }
 

@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 import com.jurysim.ui.theme.SuccessGreen
 
 @Composable
@@ -33,68 +34,72 @@ fun JurySelectionResultScreen(
         label = "scale"
     )
 
-    Column(
+    AdaptiveCenteredContent(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp)
-            .navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
-        AnimatedVisibility(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp)
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AnimatedVisibility(
             visible = true,
             enter = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn()
-        ) {
-            Icon(
+            ) {
+                Icon(
                 Icons.Default.CheckCircle,
                 contentDescription = null,
                 modifier = Modifier
                     .size(120.dp)
                     .scale(scale),
                 tint = SuccessGreen
-            )
-        }
+                )
+            }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = fadeIn(animationSpec = tween(800, delayMillis = 200))
-        ) {
-            Text(
+            ) {
+                Text(
                 text = "Congratulations!",
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold,
                 color = SuccessGreen,
                 textAlign = TextAlign.Center
-            )
-        }
+                )
+            }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = fadeIn(animationSpec = tween(800, delayMillis = 400))
-        ) {
-            Text(
+            ) {
+                Text(
                 text = "You have been selected to serve on the jury",
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground
-            )
-        }
+                )
+            }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = slideInVertically(
                 animationSpec = tween(800, delayMillis = 600),
                 initialOffsetY = { it }
             ) + fadeIn(animationSpec = tween(800, delayMillis = 600))
-        ) {
-            Card(
+            ) {
+                Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -114,22 +119,23 @@ fun JurySelectionResultScreen(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+                }
             }
-        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        AnimatedVisibility(
+            AnimatedVisibility(
             visible = true,
             enter = fadeIn(animationSpec = tween(800, delayMillis = 800))
-        ) {
-            Button(
+            ) {
+                Button(
                 onClick = onContinue,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("Proceed to Trial", style = MaterialTheme.typography.titleMedium)
+                    .heightIn(min = 56.dp)
+                ) {
+                    Text("Proceed to Trial", style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }

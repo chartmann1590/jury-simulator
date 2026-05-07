@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -13,16 +14,27 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jurysim.data.model.Message
+import com.jurysim.ui.adaptive.AppWindowSize
+import com.jurysim.ui.adaptive.LocalAppWindowSize
 
 @Composable
-fun ChatBubble(message: Message) {
+fun ChatBubble(
+    message: Message,
+    showPlayButton: Boolean = false,
+    onPlayClick: ((Message) -> Unit)? = null
+) {
     val isUser = message.isUser
     val speaker = message.speaker ?: "Unknown"
+    val windowSize = LocalAppWindowSize.current
+    val bubbleMaxWidth = when (windowSize) {
+        AppWindowSize.Compact -> 320.dp
+        AppWindowSize.Medium -> 420.dp
+        AppWindowSize.Expanded -> 520.dp
+    }
     
     // Determine colors based on speaker
     val bubbleColor = when {
@@ -54,7 +66,7 @@ fun ChatBubble(message: Message) {
 
         Column(
             modifier = Modifier
-                .widthIn(max = 300.dp)
+                .widthIn(max = bubbleMaxWidth)
                 .background(
                     color = bubbleColor,
                     shape = RoundedCornerShape(
@@ -80,6 +92,19 @@ fun ChatBubble(message: Message) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = contentColor
             )
+            if (!isUser && showPlayButton && onPlayClick != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                IconButton(
+                    onClick = { onPlayClick(message) },
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play AI voice",
+                        tint = contentColor
+                    )
+                }
+            }
         }
         
         if (isUser) {

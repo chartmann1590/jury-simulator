@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 import com.jurysim.ui.components.LoadingIndicator
 import com.jurysim.ui.components.PhaseIndicator
 
@@ -66,17 +67,21 @@ fun IntroScreen(
                 }
             }
         } else {
-            Column(
+            AdaptiveCenteredContent(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp)
             ) {
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn() + slideInVertically()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
                 ) {
-                    Column {
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn() + slideInVertically()
+                    ) {
+                        Column {
                         Icon(
                             Icons.Default.Star,
                             contentDescription = null,
@@ -142,13 +147,14 @@ fun IntroScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Button(
-                    onClick = onContinue,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("Begin Jury Selection", style = MaterialTheme.typography.titleMedium)
+                    Button(
+                        onClick = onContinue,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp)
+                    ) {
+                        Text("Begin Jury Selection", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
         }

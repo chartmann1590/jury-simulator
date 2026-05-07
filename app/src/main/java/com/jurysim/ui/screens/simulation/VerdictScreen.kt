@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 import com.jurysim.ui.components.LoadingIndicator
 import com.jurysim.ui.components.PhaseIndicator
 import com.jurysim.ui.theme.GuiltyRed
@@ -72,14 +73,18 @@ fun VerdictScreen(
                 }
             }
         } else {
-            Column(
+            AdaptiveCenteredContent(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(32.dp))
 
                 AnimatedVisibility(
                     visible = true,
@@ -247,12 +252,12 @@ fun VerdictScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // Action buttons
-                Button(
-                    onClick = onNewSimulation,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
+                    Button(
+                        onClick = onNewSimulation,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp)
+                    ) {
                     Icon(
                         Icons.Default.Refresh,
                         contentDescription = null,
@@ -264,12 +269,12 @@ fun VerdictScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedButton(
-                    onClick = onMainMenu,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
+                    OutlinedButton(
+                        onClick = onMainMenu,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp)
+                    ) {
                     Icon(
                         Icons.Default.Home,
                         contentDescription = null,
@@ -281,6 +286,7 @@ fun VerdictScreen(
 
                 // Extra bottom padding
                 Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }

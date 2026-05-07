@@ -24,12 +24,13 @@ object PromptTemplates {
     fun voirDireIntro(
         caseTitle: String,
         charges: String,
+        judgeName: String,
         jurorName: String,
         jurorOccupation: String,
         jurorAge: Int,
         hasLegalExperience: Boolean
     ): String = """
-        You are the presiding judge in the case: $caseTitle.
+        You are the presiding judge, $judgeName, in the case: $caseTitle.
         The defendant is charged with: $charges
 
         This is the jury selection phase (voir dire). You will ask the potential juror questions to determine if they are suitable for this case.
@@ -49,12 +50,13 @@ object PromptTemplates {
 
         You may reference their occupation or background in your questions to make it more personal and realistic.
 
-        Start by introducing yourself as Judge [make up a name] and ask your first question in a professional, courtroom manner.
+        Start by introducing yourself as $judgeName and ask your first question in a professional, courtroom manner.
         Keep it brief and conversational.
     """.trimIndent()
 
-    fun voirDireQuestion(previousConversation: String): String = """
+    fun voirDireQuestion(previousConversation: String, judgeName: String): String = """
         Continue the jury selection (voir dire) process.
+        Stay in character as $judgeName.
 
         Previous conversation:
         $previousConversation
@@ -340,9 +342,11 @@ object PromptTemplates {
 
     fun mistrialAnnouncement(
         caseTitle: String,
-        votingRounds: Int
+        votingRounds: Int,
+        judgeName: String
     ): String = """
         The jury in the case "$caseTitle" was unable to reach a unanimous verdict after $votingRounds rounds of voting.
+        You are $judgeName delivering the statement.
 
         Generate a brief judge's announcement declaring a mistrial. Include:
         1. Acknowledgment of the jury's efforts
@@ -402,9 +406,10 @@ object PromptTemplates {
         defendantName: String,
         charges: String,
         currentWitness: String,
-        question: String
+        question: String,
+        judgeName: String
     ): String = """
-        You are the Judge in this trial.
+        You are $judgeName in this trial.
         
         Case: $caseDescription
         Defendant: $defendantName

@@ -9,50 +9,66 @@ import com.jurysim.data.model.Message
 import com.jurysim.data.model.SimulationState
 import com.jurysim.data.model.TrialPhase
 import com.jurysim.data.model.VoteChoice
+import com.jurysim.data.llm.LlmEngine
 import com.jurysim.data.repository.CaseHistoryRepository
-import com.jurysim.data.repository.OllamaRepository
 import com.jurysim.data.repository.PreferencesRepository
 import com.jurysim.util.Constants
 import com.jurysim.util.PromptTemplates
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
 import kotlin.text.MatchResult
 
 class SimulationViewModel(
-    private val ollamaRepository: OllamaRepository,
+    private val llmEngine: LlmEngine,
     private val preferencesRepository: PreferencesRepository,
     private val caseHistoryRepository: CaseHistoryRepository
 ) : ViewModel() {
+    private data class JudgeProfile(
+        val name: String,
+        val gender: String,
+        val voiceSeed: Int
+    )
 
     private val _state = MutableStateFlow(SimulationState())
     val state: StateFlow<SimulationState> = _state.asStateFlow()
 
-    private var selectedModel: String = ""
     private var voirDireQuestionCount = 0
     private var lastFailedOperation: (suspend () -> Unit)? = null
     private var jurorProfile: com.jurysim.data.model.JurorProfile? = null
-    private var trialMessages: List<Message> = emptyList() // Store trial messages for evidence review
+    private var trialMessages: List<Message> = emptyList()
+    private var judgeProfile: JudgeProfile? = null
+
+    init {
+        viewModelScope.launch {
+            preferencesRepository.ttsEnabled.collectLatest { enabled ->
+                _state.value = _state.value.copy(ttsEnabled = enabled)
+            }
+        }
+    }
 
     fun initialize() {
         viewModelScope.launch {
-            selectedModel = preferencesRepository.selectedModel.first() ?: ""
             jurorProfile = preferencesRepository.getJurorProfile()
             generateCase()
         }
     }
 
     private suspend fun generateCase() {
+        judgeProfile = createJudgeProfile()
         _state.value = _state.value.copy(
             isLoading = true,
-            currentPhase = TrialPhase.INTRO
+            currentPhase = TrialPhase.INTRO,
+            judgeName = judgeProfile?.name.orEmpty(),
+            judgeGender = judgeProfile?.gender ?: "UNKNOWN",
+            judgeVoiceSeed = judgeProfile?.voiceSeed ?: 0
         )
 
         val prompt = PromptTemplates.generateCase()
-        val result = ollamaRepository.generate(selectedModel, prompt)
+        val result = llmEngine.generate(prompt)
 
         result.onSuccess { response ->
             parseCase(response)
@@ -93,19 +109,20 @@ class SimulationViewModel(
             val prompt = PromptTemplates.voirDireIntro(
                 caseTitle = _state.value.caseTitle,
                 charges = _state.value.charges,
+                judgeName = getJudgeName(),
                 jurorName = profile.name.ifBlank { "Potential Juror" },
                 jurorOccupation = profile.occupation.ifBlank { "Not specified" },
                 jurorAge = profile.age,
                 hasLegalExperience = profile.hasLegalExperience
             )
 
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
                     content = response,
                     isUser = false,
-                    speaker = "Judge"
+                    speaker = getJudgeDisplaySpeaker()
                 )
                 _state.value = _state.value.copy(
                     messages = _state.value.messages + message,
@@ -126,6 +143,10 @@ class SimulationViewModel(
 
     fun respondToVoirDire(userResponse: String) {
         viewModelScope.launch {
+            if (_state.value.isJurySelected || _state.value.isJuryDismissed || _state.value.isCaseClosed) {
+                return@launch
+            }
+
             val userMessage = Message(content = userResponse, isUser = true)
             _state.value = _state.value.copy(
                 messages = _state.value.messages + userMessage,
@@ -136,14 +157,17 @@ class SimulationViewModel(
                 "${if (it.isUser) "Potential Juror" else it.speaker}: ${it.content}"
             }
 
-            val prompt = PromptTemplates.voirDireQuestion(conversation)
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val prompt = PromptTemplates.voirDireQuestion(
+                previousConversation = conversation,
+                judgeName = getJudgeName()
+            )
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
                     content = response,
                     isUser = false,
-                    speaker = "Judge"
+                    speaker = getJudgeDisplaySpeaker()
                 )
 
                 val updatedMessages = _state.value.messages + message
@@ -169,6 +193,8 @@ class SimulationViewModel(
                     messages = updatedMessages,
                     isLoading = false,
                     isJurySelected = isSelected,
+                    isJuryDismissed = isDismissed,
+                    isCaseClosed = isDismissed,
                     juryAcceptanceReason = acceptanceReason,
                     juryDismissalReason = dismissalReason
                 )
@@ -218,8 +244,8 @@ class SimulationViewModel(
 
             try {
                 // Run generations in parallel to save time
-                val prosecutionDeferred = async { ollamaRepository.generate(selectedModel, prosecutionPrompt) }
-                val defenseDeferred = async { ollamaRepository.generate(selectedModel, defensePrompt) }
+                val prosecutionDeferred = async { llmEngine.generate(prosecutionPrompt) }
+                val defenseDeferred = async { llmEngine.generate(defensePrompt) }
 
                 val prosecutionResult = prosecutionDeferred.await()
                 val defenseResult = defenseDeferred.await()
@@ -291,7 +317,7 @@ class SimulationViewModel(
             defendantName = _state.value.defendantName
         )
 
-        val result = ollamaRepository.generate(selectedModel, prompt)
+        val result = llmEngine.generate(prompt)
 
         result.onSuccess { response ->
             val witnessName = response.substringAfter("WITNESS:").substringBefore("TESTIMONY:").trim()
@@ -337,7 +363,7 @@ class SimulationViewModel(
                 defendantName = _state.value.defendantName
             )
 
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -386,8 +412,8 @@ class SimulationViewModel(
 
             try {
                 // Run generations in parallel
-                val prosecutionDeferred = async { ollamaRepository.generate(selectedModel, prosecutionPrompt) }
-                val defenseDeferred = async { ollamaRepository.generate(selectedModel, defensePrompt) }
+                val prosecutionDeferred = async { llmEngine.generate(prosecutionPrompt) }
+                val defenseDeferred = async { llmEngine.generate(defensePrompt) }
 
                 val prosecutionResult = prosecutionDeferred.await()
                 val defenseResult = defenseDeferred.await()
@@ -438,7 +464,7 @@ class SimulationViewModel(
                 jurors = _state.value.aiJurors
             )
 
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -476,7 +502,7 @@ class SimulationViewModel(
                 userInput = userInput,
                 jurors = _state.value.aiJurors
             )
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -515,7 +541,7 @@ class SimulationViewModel(
             }
 
             val prompt = PromptTemplates.finalVerdict(conversation)
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val verdict = if (response.contains("VERDICT: GUILTY", ignoreCase = true)) {
@@ -546,7 +572,7 @@ class SimulationViewModel(
                         caseDescription = _state.value.caseDescription,
                         verdict = verdict,
                         wasJurySelected = _state.value.isJurySelected,
-                        modelUsed = selectedModel
+                        modelUsed = Constants.LITERTLM_MODEL_DISPLAY_NAME
                     )
                 }
             }.onFailure { error ->
@@ -616,7 +642,7 @@ class SimulationViewModel(
             _state.value = _state.value.copy(isLoading = true)
 
             val prompt = PromptTemplates.generateAIJurors()
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val jurors = parseJurors(response)
@@ -717,7 +743,7 @@ class SimulationViewModel(
                 userInput = userInput
             )
 
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val jurorMessage = Message(
@@ -775,7 +801,7 @@ class SimulationViewModel(
                 votingRound = _state.value.currentVotingRound
             )
 
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
             result.onSuccess { response ->
                 val vote = if (response.contains("VOTE: GUILTY", ignoreCase = true) &&
                               !response.contains("NOT_GUILTY", ignoreCase = true) &&
@@ -871,7 +897,7 @@ class SimulationViewModel(
                 caseDescription = _state.value.caseDescription,
                 verdict = verdict,
                 wasJurySelected = _state.value.isJurySelected,
-                modelUsed = selectedModel
+                modelUsed = Constants.LITERTLM_MODEL_DISPLAY_NAME
             )
         }
     }
@@ -882,16 +908,17 @@ class SimulationViewModel(
 
             val prompt = PromptTemplates.mistrialAnnouncement(
                 caseTitle = _state.value.caseTitle,
-                votingRounds = _state.value.maxVotingRounds
+                votingRounds = _state.value.maxVotingRounds,
+                judgeName = getJudgeName()
             )
 
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 val mistrialMessage = Message(
                     content = response,
                     isUser = false,
-                    speaker = "Judge"
+                    speaker = getJudgeDisplaySpeaker()
                 )
                 _state.value = _state.value.copy(
                     currentPhase = TrialPhase.VERDICT,
@@ -919,7 +946,7 @@ class SimulationViewModel(
                 caseDescription = _state.value.caseDescription,
                 verdict = "MISTRIAL",
                 wasJurySelected = _state.value.isJurySelected,
-                modelUsed = selectedModel
+                modelUsed = Constants.LITERTLM_MODEL_DISPLAY_NAME
             )
         }
     }
@@ -949,7 +976,7 @@ class SimulationViewModel(
                 evidencePresented = evidenceText
             )
 
-            val result = ollamaRepository.generate(selectedModel, prompt)
+            val result = llmEngine.generate(prompt)
 
             result.onSuccess { response ->
                 _state.value = _state.value.copy(
@@ -997,10 +1024,11 @@ class SimulationViewModel(
                 defendantName = _state.value.defendantName,
                 charges = _state.value.charges,
                 currentWitness = "Witness ${_state.value.currentWitnessIndex}",
-                question = question
+                question = question,
+                judgeName = getJudgeName()
             )
 
-            val judgeResult = ollamaRepository.generate(selectedModel, judgePrompt)
+            val judgeResult = llmEngine.generate(judgePrompt)
             
             val judgeResponse = judgeResult.getOrElse {
                 _state.value = _state.value.copy(
@@ -1014,7 +1042,7 @@ class SimulationViewModel(
             val judgeMessage = Message(
                 content = judgeResponse,
                 isUser = false,
-                speaker = "Judge"
+                speaker = getJudgeDisplaySpeaker()
             )
             
             _state.value = _state.value.copy(
@@ -1030,7 +1058,7 @@ class SimulationViewModel(
                     question = question
                 )
 
-                val witnessResult = ollamaRepository.generate(selectedModel, witnessPrompt)
+                val witnessResult = llmEngine.generate(witnessPrompt)
                 
                 witnessResult.onSuccess { witnessResponse ->
                      val witnessMessage = Message(
@@ -1087,5 +1115,39 @@ class SimulationViewModel(
         voirDireQuestionCount = 0
         lastFailedOperation = null
         trialMessages = emptyList()
+    }
+
+    private fun getJudgeName(): String {
+        return judgeProfile?.name?.takeIf { it.isNotBlank() }
+            ?: _state.value.judgeName.takeIf { it.isNotBlank() }
+            ?: "Judge Taylor"
+    }
+
+    private fun getJudgeDisplaySpeaker(): String = getJudgeName()
+
+    private fun createJudgeProfile(): JudgeProfile {
+        val femaleJudges = listOf(
+            "Judge Elena Brooks",
+            "Judge Maya Reynolds",
+            "Judge Olivia Carter",
+            "Judge Priya Singh",
+            "Judge Hannah Foster",
+            "Judge Lauren Ortiz"
+        )
+        val maleJudges = listOf(
+            "Judge Marcus Bennett",
+            "Judge Daniel Hayes",
+            "Judge Victor Cole",
+            "Judge Anthony Price",
+            "Judge Samuel Turner",
+            "Judge Adrian Wells"
+        )
+        val allJudges = femaleJudges.map { it to "FEMALE" } + maleJudges.map { it to "MALE" }
+        val selected = allJudges.random()
+        return JudgeProfile(
+            name = selected.first,
+            gender = selected.second,
+            voiceSeed = kotlin.random.Random.nextInt()
+        )
     }
 }

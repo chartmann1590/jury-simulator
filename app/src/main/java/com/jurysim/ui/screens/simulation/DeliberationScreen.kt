@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.jurysim.data.model.AIJuror
 import com.jurysim.data.model.TrialPhase
 import com.jurysim.data.model.VoteChoice
+import com.jurysim.ui.audio.ChatTtsPlayer
+import com.jurysim.ui.adaptive.AdaptiveCenteredContent
 import com.jurysim.ui.components.ChatBubble
 import com.jurysim.ui.components.LoadingIndicator
 import com.jurysim.ui.components.PhaseIndicator
@@ -36,12 +39,18 @@ fun DeliberationScreen(
     onVerdictReady: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
     var userInput by remember { mutableStateOf("") }
     var isJurorListExpanded by remember { mutableStateOf(false) }
     var showVotingDialog by remember { mutableStateOf(false) }
     var showJurorProfile by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val ttsPlayer = remember { ChatTtsPlayer(context) }
+
+    DisposableEffect(Unit) {
+        onDispose { ttsPlayer.release() }
+    }
 
     // Get current conversation based on selected juror
     val currentMessages = if (state.currentJurorChatId == -1) {
@@ -204,12 +213,13 @@ fun DeliberationScreen(
                 }
             }
         ) { paddingValues ->
-            Column(
+            AdaptiveCenteredContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                PhaseIndicator(currentPhase = state.currentPhase)
+                Column(modifier = Modifier.fillMaxSize()) {
+                    PhaseIndicator(currentPhase = state.currentPhase)
 
                 // Juror Selection Row
                 Card(
@@ -340,7 +350,17 @@ fun DeliberationScreen(
                             enter = fadeIn() + slideInVertically(),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            ChatBubble(message = message)
+                            ChatBubble(
+                                message = message,
+                                showPlayButton = state.ttsEnabled && !message.isUser,
+                                onPlayClick = { selected ->
+                                    ttsPlayer.speak(
+                                        selected,
+                                        judgeGender = state.judgeGender,
+                                        judgeVoiceSeed = state.judgeVoiceSeed
+                                    )
+                                }
+                            )
                         }
                     }
 
@@ -356,33 +376,34 @@ fun DeliberationScreen(
                 }
 
                 // Error display
-                AnimatedVisibility(
-                    visible = state.error != null,
-                    enter = slideInVertically() + fadeIn(),
-                    exit = slideOutVertically() + fadeOut()
-                ) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    AnimatedVisibility(
+                        visible = state.error != null,
+                        enter = slideInVertically() + fadeIn(),
+                        exit = slideOutVertically() + fadeOut()
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Error: ${state.error}",
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(
-                                onClick = { viewModel.retryLastOperation() },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "Error: ${state.error}",
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    style = MaterialTheme.typography.bodySmall
                                 )
-                            ) {
-                                Text("Retry")
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(
+                                    onClick = { viewModel.retryLastOperation() },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.error
+                                    )
+                                ) {
+                                    Text("Retry")
+                                }
                             }
                         }
                     }

@@ -3,6 +3,7 @@ package com.jurysim.data.repository
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -15,8 +16,8 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class PreferencesRepository(private val context: Context) {
 
     companion object {
-        val SERVER_URL_KEY = stringPreferencesKey("server_url")
-        val SELECTED_MODEL_KEY = stringPreferencesKey("selected_model")
+        val MODEL_READY_KEY = booleanPreferencesKey("model_ready")
+        val TTS_ENABLED_KEY = booleanPreferencesKey("tts_enabled")
         val JUROR_NAME_KEY = stringPreferencesKey("juror_name")
         val JUROR_AGE_KEY = stringPreferencesKey("juror_age")
         val JUROR_OCCUPATION_KEY = stringPreferencesKey("juror_occupation")
@@ -27,23 +28,28 @@ class PreferencesRepository(private val context: Context) {
         val JUROR_INFO_KEY = stringPreferencesKey("juror_info")
     }
 
-    val serverUrl: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[SERVER_URL_KEY]
+    /**
+     * True once the on-device LiteRT-LM model has been fully downloaded,
+     * verified, and successfully loaded once. Drives the start destination
+     * (Onboarding vs Home).
+     */
+    val modelReady: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[MODEL_READY_KEY] ?: false
     }
 
-    val selectedModel: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[SELECTED_MODEL_KEY]
+    val ttsEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[TTS_ENABLED_KEY] ?: true
     }
 
-    suspend fun saveServerUrl(url: String) {
-        context.dataStore.edit { preferences ->
-            preferences[SERVER_URL_KEY] = url
+    suspend fun setModelReady(value: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[MODEL_READY_KEY] = value
         }
     }
 
-    suspend fun saveSelectedModel(model: String) {
-        context.dataStore.edit { preferences ->
-            preferences[SELECTED_MODEL_KEY] = model
+    suspend fun setTtsEnabled(value: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[TTS_ENABLED_KEY] = value
         }
     }
 

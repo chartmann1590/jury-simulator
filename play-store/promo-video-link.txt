@@ -1,0 +1,13 @@
+# Promo Video
+
+The promo video lives in the repo at marketing/assets/jurysim-promo.mp4 (mirrored at site/assets/jurysim-promo.mp4).
+
+Play Store accepts only YouTube URLs in the listing — not direct uploads.
+
+Steps:
+1. Upload marketing/assets/jurysim-promo.mp4 to YouTube as Public or Unlisted.
+2. Paste the youtu.be/<id> URL into the Play Console "Promo video" field.
+3. Replace this file's contents with the final URL once uploaded.
+
+Voiceover narration script: see marketing/promo-video-voiceover.md
+Voiceover audio (already produced): marketing/assets/jurysim-voiceover.wav
