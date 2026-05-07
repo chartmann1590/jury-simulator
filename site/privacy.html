@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy · Jury Simulator</title>
+  <meta name="description" content="What Jury Simulator does — and doesn't — collect." />
+  <meta name="theme-color" content="#0F172A" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="./">
+        <img src="assets/icon.svg" alt="" width="28" height="28" />
+        <span>Jury Simulator</span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="index.html#features">Features</a>
+        <a href="index.html#screenshots">Screenshots</a>
+        <a href="privacy.html" aria-current="page">Privacy</a>
+        <a href="support.html">Support</a>
+        <a class="ghost" href="https://github.com/chartmann1590/jury-simulator">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="prose">
+    <div class="container">
+      <p class="eyebrow">Privacy Policy</p>
+      <h1>What Jury Simulator does — and doesn't — collect.</h1>
+      <p class="effective">Effective 7 May 2026 · Last updated 7 May 2026</p>
+
+      <p class="lede">Jury Simulator runs trials on your device. Most of what you do in the app — your voir dire answers, the conversations you have with jurors, your notes, your votes — never leaves your phone. This page explains the few exceptions and exactly what happens to that data.</p>
+
+      <h2>What stays on your device</h2>
+      <p>All trial dialogue is generated locally by an on-device model. That means:</p>
+      <ul>
+        <li>Anything you type to a juror or write in your notebook is processed on the same phone you typed it on.</li>
+        <li>Your case history and verdicts are stored in a private local database that other apps cannot read.</li>
+        <li>We do not have a server that holds your gameplay. There is nothing for us to leak, sell, or be subpoenaed for.</li>
+      </ul>
+
+      <h2>What does leave your device</h2>
+
+      <h3>Model download</h3>
+      <p>On first launch the app downloads the AI model (~3.65 GB) over HTTPS from a public model host (Google AI Edge). This is a one-time download. We do not run a server in the middle — the request goes directly from your device to the host.</p>
+
+      <h3>AdMob ads</h3>
+      <p>The app shows banner and occasional interstitial ads via Google AdMob to cover hosting costs. AdMob may collect:</p>
+      <ul>
+        <li>Your advertising ID (resettable in Android settings)</li>
+        <li>Approximate location (country level, derived from your IP)</li>
+        <li>Device model, OS version, language, and similar non-identifying technical data</li>
+      </ul>
+      <p>This data is governed by <a href="https://policies.google.com/technologies/ads">Google's Ads &amp; Privacy Policy</a>. You can limit personalized ads at any time in your Android device settings under <em>Privacy → Ads → Reset advertising ID</em> or <em>Opt out of Ads Personalization</em>. Jury Simulator will keep working — you'll just see less-relevant ads.</p>
+
+      <h2>What we don't do</h2>
+      <ul>
+        <li>No third-party analytics. No Firebase, no Crashlytics, no Mixpanel, no Amplitude.</li>
+        <li>No account system. We don't ask you to sign up, sign in, or hand over an email.</li>
+        <li>No cross-app tracking. The only third party that sees anything is AdMob, and AdMob only sees ad-serving data — not your gameplay or notes.</li>
+      </ul>
+
+      <h2>Children</h2>
+      <p>Jury Simulator depicts criminal trials and is not intended for children under 13. We do not knowingly collect data from children. If you believe a child has been served personalized ads, you can disable ad personalization at the OS level (above) or uninstall the app.</p>
+
+      <h2>Permissions, in plain language</h2>
+      <ul>
+        <li><strong>Internet &amp; network state</strong> — to download the model and load ads.</li>
+        <li><strong>Foreground service &amp; notifications</strong> — to keep the model download running with a progress notification, then notify you when it finishes.</li>
+      </ul>
+
+      <h2>Changes to this policy</h2>
+      <p>If we ever start collecting more data — for example, adding crash reporting — this page will be updated and the effective date above will change. The version of this policy that ships with each release is also archived in the public source repository.</p>
+
+      <h2>Contact</h2>
+      <p>Privacy questions, takedown requests, or just curious? Email <a href="mailto:charles.h.hartmann1@gmail.com">charles.h.hartmann1@gmail.com</a>.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="brand">
+        <img src="assets/icon.svg" alt="" width="28" height="28" />
+        <span>Jury Simulator</span>
+      </div>
+      <nav aria-label="Footer">
+        <a href="privacy.html">Privacy policy</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/chartmann1590/jury-simulator">Source</a>
+        <a href="https://github.com/chartmann1590/jury-simulator/releases">Releases</a>
+      </nav>
+      <p class="legal">© 2026 Charles Hartmann · MIT-licensed app.</p>
+    </div>
+  </footer>
+</body>
+</html>

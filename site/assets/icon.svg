@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108" role="img" aria-label="Jury Simulator">
+  <defs>
+    <clipPath id="clip">
+      <rect width="108" height="108" rx="24" ry="24" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip)">
+    <rect width="108" height="108" fill="#1E3A8A" />
+    <path d="M0 68 L108 40 L108 108 L0 108 Z" fill="#1E293B" opacity="0.55" />
+    <g fill="#FBBF24">
+      <path d="M52 30 H56 V80 H52 Z" />
+      <path d="M30 80 H78 V84 H30 Z" />
+      <path d="M26 30 H82 V34 H26 Z" />
+      <path d="M30 34 H32 V42 H30 Z" />
+      <path d="M76 34 H78 V42 H76 Z" />
+      <path d="M22 42 H40 L37 50 H25 Z" />
+      <path d="M68 42 H86 L83 50 H71 Z" />
+      <path d="M50 24 H58 V30 H50 Z" />
+    </g>
+  </g>
+</svg>
