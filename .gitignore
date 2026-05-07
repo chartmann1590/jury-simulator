@@ -430,6 +430,9 @@ venv.bak/
 # (was: mkdocs documentation /site/ — removed because we use /site/ as the
 # GitHub Pages source for the marketing site.)
 
+# Gradle wrapper jar must ship with the repo — override the global *.jar rule.
+!gradle/wrapper/gradle-wrapper.jar
+
 # mypy
 .mypy_cache/
 .dmypy.json
