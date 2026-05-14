@@ -82,8 +82,19 @@ jobs:
       - name: Compute version
         id: version
         run: |
-          VERSION_CODE=$((${{ github.run_number }} + 100))
-          VERSION_NAME="1.0.${{ github.run_number }}"
+          # versionCode must strictly increase on every run, INCLUDING re-runs of
+          # the same workflow run. github.run_number stays the same on rerun, so
+          # we combine it with github.run_attempt: code = run_number*100 + attempt.
+          # This keeps codes monotonically increasing while leaving plenty of
+          # headroom (up to 99 attempts per run before the next push overruns).
+          RUN_NUMBER=${{ github.run_number }}
+          RUN_ATTEMPT=${{ github.run_attempt }}
+          VERSION_CODE=$((RUN_NUMBER * 100 + RUN_ATTEMPT))
+          if [ "$RUN_ATTEMPT" = "1" ]; then
+            VERSION_NAME="1.0.$RUN_NUMBER"
+          else
+            VERSION_NAME="1.0.$RUN_NUMBER.$RUN_ATTEMPT"
+          fi
           echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
           echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION_NAME" >> "$GITHUB_OUTPUT"
