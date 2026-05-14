@@ -42,11 +42,11 @@ val hasReleaseSigning = listOf(
 ).all { !it.isNullOrBlank() }
 
 android {
-    namespace = "com.jurysim"
+    namespace = "com.charles.jurysim"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.jurysim"
+        applicationId = "com.charles.jurysim"
         minSdk = 26
         targetSdk = 35
         versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
@@ -173,4 +173,7 @@ dependencies {
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Unit tests
+    testImplementation("junit:junit:4.13.2")
 }

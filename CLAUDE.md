@@ -30,7 +30,7 @@ Note: Build may show a warning about compileSdk=35 with Android Gradle Plugin 8.
 ### MVVM Structure
 
 ```
-com.jurysim/
+com.charles.jurysim/
 ├── data/
 │   ├── local/        # Room database (JurySimDatabase, CaseDao, CaseEntity)
 │   ├── model/        # Data classes: SimulationState, AIJuror, Evidence, Message, TrialPhase

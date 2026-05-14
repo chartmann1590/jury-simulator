@@ -33,7 +33,7 @@ The data layer of the Jury Simulator application manages all data operations, in
 
 ### Core Data Classes
 
-Located in `com.jurysim.data.model`, these represent the domain entities:
+Located in `com.charles.jurysim.data.model`, these represent the domain entities:
 
 #### SimulationState
 - Single source of truth for active simulation

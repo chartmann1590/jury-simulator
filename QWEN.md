@@ -19,7 +19,7 @@ The application leverages a local LLM (Large Language Model) via **Ollama** to g
 
 ## Architecture & Key Components
 
-### 1. UI Layer (`com.jurysim.ui`)
+### 1. UI Layer (`com.charles.jurysim.ui`)
 *   **Navigation:** Single Activity (`MainActivity`) using `JurySimNavGraph` for Compose Navigation.
 *   **Screens:**
     *   `Home`: Main entry point with options for new cases, history, settings, and profile
@@ -32,7 +32,7 @@ The application leverages a local LLM (Large Language Model) via **Ollama** to g
 *   **Components:**
     *   `NotebookScreen`: A reusable component/overlay for viewing auto-collected facts (Evidence, Witnesses) and user notes
 
-### 2. Data Layer (`com.jurysim.data`)
+### 2. Data Layer (`com.charles.jurysim.data`)
 *   **Repositories:**
     *   `OllamaRepository`: Handles API calls to the local Ollama instance (`/api/generate`, `/api/tags`).
     *   `CaseHistoryRepository`: Saves finished trials to a local Room database.
@@ -43,7 +43,7 @@ The application leverages a local LLM (Large Language Model) via **Ollama** to g
     *   `Fact`: Represents a piece of information (Evidence/Person) auto-extracted from the trial.
     *   `TrialPhase`: Enum defining the state machine (SETUP -> VOIR_DIRE -> TRIAL -> DELIBERATION -> VERDICT).
 
-### 3. Simulation Logic (`com.jurysim.util`)
+### 3. Simulation Logic (`com.charles.jurysim.util`)
 *   **PromptTemplates.kt:** Contains the engineered prompts sent to the LLM. This is the "brain" of the simulation, defining how the AI should act as Judge, Prosecutor, Defense, or individual Jurors.
 
 ## Trial Flow
@@ -149,7 +149,7 @@ The application allows cleartext HTTP traffic for local Ollama servers:
 ## Project Structure
 
 ```
-com.jurysim/
+com.charles.jurysim/
 ├── data/
 │   ├── local/        # Room database (JurySimDatabase, CaseDao, CaseEntity)
 │   ├── model/        # Data classes: SimulationState, AIJuror, Evidence, Message, TrialPhase

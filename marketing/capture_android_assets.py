@@ -72,7 +72,7 @@ def ensure_out_dir():
 def main():
     ensure_out_dir()
 
-    run(["adb", "-s", SERIAL, "shell", "am", "start", "-n", "com.jurysim/.MainActivity"])
+    run(["adb", "-s", SERIAL, "shell", "am", "start", "-n", "com.charles.jurysim/.MainActivity"])
     time.sleep(3)
 
     # Dismiss Android compatibility warning if present.

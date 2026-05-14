@@ -25,7 +25,7 @@ The Jury Simulator application follows the MVVM (Model-View-ViewModel) architect
 
 ### UI Layer
 
-Located in `com.jurysim.ui`, this layer contains:
+Located in `com.charles.jurysim.ui`, this layer contains:
 
 - **Navigation**: `NavGraph.kt` manages app-wide navigation
 - **Screens**: Individual composables for each screen
@@ -40,7 +40,7 @@ Located in `com.jurysim.ui`, this layer contains:
 
 ### ViewModel Layer
 
-Located in `com.jurysim.ui.screens.*`, this layer contains:
+Located in `com.charles.jurysim.ui.screens.*`, this layer contains:
 
 - **State Management**: Using `StateFlow` and `MutableStateFlow`
 - **Business Logic**: Trial flow management, AI interaction logic
@@ -52,7 +52,7 @@ Located in `com.jurysim.ui.screens.*`, this layer contains:
 
 ### Data Layer
 
-Located in `com.jurysim.data`, this layer contains:
+Located in `com.charles.jurysim.data`, this layer contains:
 
 - **Models**: Data classes representing domain entities
 - **Remote**: API interfaces and DTOs for Ollama integration

@@ -4,7 +4,7 @@
 
 This document provides a comprehensive reference for the public APIs and interfaces available in the Jury Simulator application. It covers the main classes, methods, and data structures that developers may interact with when extending or modifying the application.
 
-## Package: com.jurysim.data.model
+## Package: com.charles.jurysim.data.model
 
 ### SimulationState
 Represents the complete state of an active trial simulation.
@@ -119,7 +119,7 @@ data class Fact(
 )
 ```
 
-## Package: com.jurysim.ui.screens.simulation
+## Package: com.charles.jurysim.ui.screens.simulation
 
 ### SimulationViewModel
 Main ViewModel managing the trial simulation state and logic.
@@ -160,7 +160,7 @@ fun submitQuestion(question: String)
 fun goToMainMenu()
 ```
 
-## Package: com.jurysim.data.repository
+## Package: com.charles.jurysim.data.repository
 
 ### OllamaRepository
 Handles communication with the Ollama API.
@@ -211,7 +211,7 @@ suspend fun setJurorProfile(profile: JurorProfile)
 suspend fun getJurorProfile(): JurorProfile?
 ```
 
-## Package: com.jurysim.data.local
+## Package: com.charles.jurysim.data.local
 
 ### JurySimDatabase
 Main database class for Room database.
@@ -261,7 +261,7 @@ data class CaseEntity(
 )
 ```
 
-## Package: com.jurysim.util
+## Package: com.charles.jurysim.util
 
 ### Constants
 Application-wide constants.
@@ -360,7 +360,7 @@ object PromptTemplates {
 }
 ```
 
-## Package: com.jurysim.data.remote
+## Package: com.charles.jurysim.data.remote
 
 ### OllamaApiService
 Interface for Ollama API communication.
@@ -375,7 +375,7 @@ interface OllamaApiService {
 }
 ```
 
-## Package: com.jurysim.data.remote.dto
+## Package: com.charles.jurysim.data.remote.dto
 
 ### OllamaGenerateRequest
 Request body for the generate API endpoint.
