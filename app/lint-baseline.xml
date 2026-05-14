@@ -150,7 +150,7 @@
         errorLine1="    modifier: Modifier = Modifier"
         errorLine2="    ~~~~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="52"
             column="5"/>
     </issue>
@@ -161,7 +161,7 @@
         errorLine1="        DisposableEffect(adView) {"
         errorLine2="                         ~~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/ads/AdMobComponents.kt"
+            file="src/main/java/com/charles/jurysim/ui/ads/AdMobComponents.kt"
             line="51"
             column="26"/>
     </issue>
@@ -172,7 +172,7 @@
         errorLine1="        val adView = remember(adWidthDp) {"
         errorLine2="                     ~~~~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/ads/AdMobComponents.kt"
+            file="src/main/java/com/charles/jurysim/ui/ads/AdMobComponents.kt"
             line="44"
             column="22"/>
     </issue>
@@ -183,7 +183,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJurySelected) {"
         errorLine2="                                           ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="195"
             column="44"/>
     </issue>
@@ -194,7 +194,7 @@
         errorLine1="                reason = simulationViewModel.state.value.juryAcceptanceReason,"
         errorLine2="                                                   ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="203"
             column="52"/>
     </issue>
@@ -205,7 +205,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJuryDismissed) {"
         errorLine2="                                           ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="213"
             column="44"/>
     </issue>
@@ -216,7 +216,7 @@
         errorLine1="                reason = simulationViewModel.state.value.juryDismissalReason,"
         errorLine2="                                                   ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="221"
             column="52"/>
     </issue>
@@ -227,7 +227,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJurySelected || simulationViewModel.state.value.isCaseClosed) {"
         errorLine2="                                           ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="232"
             column="44"/>
     </issue>
@@ -238,7 +238,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJurySelected || simulationViewModel.state.value.isCaseClosed) {"
         errorLine2="                                                                                             ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="232"
             column="94"/>
     </issue>
@@ -249,7 +249,7 @@
         errorLine1="                    if (simulationViewModel.state.value.isJuryDismissed) Screen.JuryDismissed.route else Screen.VoirDire.route"
         errorLine2="                                                  ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="234"
             column="51"/>
     </issue>
@@ -260,7 +260,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJurySelected || simulationViewModel.state.value.isCaseClosed) {"
         errorLine2="                                           ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="251"
             column="44"/>
     </issue>
@@ -271,7 +271,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJurySelected || simulationViewModel.state.value.isCaseClosed) {"
         errorLine2="                                                                                             ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="251"
             column="94"/>
     </issue>
@@ -282,7 +282,7 @@
         errorLine1="                    if (simulationViewModel.state.value.isJuryDismissed) Screen.JuryDismissed.route else Screen.VoirDire.route"
         errorLine2="                                                  ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="253"
             column="51"/>
     </issue>
@@ -293,7 +293,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJurySelected || simulationViewModel.state.value.isCaseClosed) {"
         errorLine2="                                           ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="269"
             column="44"/>
     </issue>
@@ -304,7 +304,7 @@
         errorLine1="            if (!simulationViewModel.state.value.isJurySelected || simulationViewModel.state.value.isCaseClosed) {"
         errorLine2="                                                                                             ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="269"
             column="94"/>
     </issue>
@@ -315,7 +315,7 @@
         errorLine1="                    if (simulationViewModel.state.value.isJuryDismissed) Screen.JuryDismissed.route else Screen.VoirDire.route"
         errorLine2="                                                  ~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/navigation/NavGraph.kt"
+            file="src/main/java/com/charles/jurysim/ui/navigation/NavGraph.kt"
             line="271"
             column="51"/>
     </issue>
@@ -333,7 +333,7 @@
         errorLine1="    var selectedTab by remember { mutableStateOf(0) }"
         errorLine2="                                  ~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/components/NotebookScreen.kt"
+            file="src/main/java/com/charles/jurysim/ui/components/NotebookScreen.kt"
             line="30"
             column="35"/>
     </issue>
@@ -344,7 +344,7 @@
         errorLine1="        appContext.filesDir.usableSpace >= Constants.LITERTLM_MIN_FREE_SPACE_BYTES"
         errorLine2="                            ~~~~~~~~~~~">
         <location
-            file="src/main/java/com/jurysim/data/llm/ModelManager.kt"
+            file="src/main/java/com/charles/jurysim/data/llm/ModelManager.kt"
             line="43"
             column="29"/>
     </issue>
@@ -355,7 +355,7 @@
         errorLine1="            freeSpaceBytes = ctx.filesDir.usableSpace"
         errorLine2="                                          ~~~~~~~~~~~">
         <location
-            file="src/main/java/com/jurysim/ui/screens/onboarding/OnboardingViewModel.kt"
+            file="src/main/java/com/charles/jurysim/ui/screens/onboarding/OnboardingViewModel.kt"
             line="70"
             column="43"/>
     </issue>
