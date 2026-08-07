@@ -1,5 +1,6 @@
 package com.charles.jurysim.ui.screens.simulation
 
+import android.app.Activity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
@@ -20,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.charles.jurysim.review.ReviewPrompter
 import com.charles.jurysim.ui.adaptive.AdaptiveCenteredContent
 import com.charles.jurysim.ui.components.LoadingIndicator
 import com.charles.jurysim.ui.components.PhaseIndicator
@@ -36,6 +39,16 @@ fun VerdictScreen(
     onMainMenu: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+
+    // A verdict (guilty, not guilty, or mistrial) just landed — a full session completed,
+    // the game's own moment of payoff.
+    LaunchedEffect(state.verdict) {
+        if (state.verdict != null) {
+            (context as? Activity)?.let { ReviewPrompter.maybeRequestReview(it) }
+        }
+    }
+
     val infiniteTransition = rememberInfiniteTransition(label = "verdict")
     val scale by infiniteTransition.animateFloat(
         initialValue = 0.9f,
