@@ -107,3 +107,4 @@ jobs:
           track: production
           status: completed
           whatsNewDirectory: distribution/whatsnew
+          changesNotSentForReview: true
