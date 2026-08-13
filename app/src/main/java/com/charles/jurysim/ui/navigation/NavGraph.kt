@@ -147,8 +147,15 @@ fun JurySimNavGraph(
                     navController.navigate(Screen.Onboarding.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
+                },
+                onMoreApps = {
+                    navController.navigate(Screen.MoreApps.route)
                 }
             )
+        }
+
+        composable(Screen.MoreApps.route) {
+            com.charles.jurysim.ui.screens.moreapps.MoreAppsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Screen.JurorProfile.route) {
