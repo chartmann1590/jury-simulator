@@ -12,32 +12,38 @@ wait 180
 shot 05-after-download
 taploop (?i)^(continue|ok|got it|allow|not now|later|skip|done)$
 wait 10
-adclose
 shot 06-main-menu
-tap (?i)^start new case$
-wait 20
-adclose
-shot 07-new-case
-back
-wait 4
-tap (?i)^case history$
-wait 5
-adclose
-shot 08-case-history
-back
-wait 4
-tap (?i)^juror profile$
-wait 5
-shot 09-juror-profile
-back
-wait 4
-tap (?i)^settings$
-wait 5
-adclose
-shot 10-settings
-scrollto (?i)more from this developer
+stop
 wait 2
+launch
+wait 12
+tapxy 907 487
+wait 15
+shot 07-new-case
+stop
+wait 2
+launch
+wait 12
+tapxy 907 591
+wait 15
+shot 08-case-history
+stop
+wait 2
+launch
+wait 12
+tapxy 907 695
+wait 15
+shot 09-juror-profile
+stop
+wait 2
+launch
+wait 12
+tapxy 907 800
+wait 15
+shot 10-settings
+scrollto (?i)^more apps from this developer
+wait 5
 shot 11-more-apps
-back
-wait 3
-shot 12-back
+tap (?i)^grocy fridge scanner$
+wait 6
+shot 12-more-apps-tapped
