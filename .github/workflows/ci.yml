@@ -5,6 +5,7 @@ on:
     branches:
       - '**'
       - '!master'
+      - '!amazon'  # amazon branch builds run in amazon.yml only (Tab, Nov 7 2026)
   pull_request:
     branches: [master]
 
