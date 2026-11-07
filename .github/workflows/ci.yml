@@ -5,6 +5,7 @@ on:
     branches:
       - '**'
       - '!master'
+      - '!direct-stripe'
   pull_request:
     branches: [master]
 

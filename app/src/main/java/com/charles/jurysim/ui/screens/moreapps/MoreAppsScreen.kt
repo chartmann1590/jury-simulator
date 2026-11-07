@@ -79,7 +79,7 @@ fun MoreAppsScreen(onBack: () -> Unit) {
         ) {
             items(crossPromoApps) { app ->
                 Card(
-                    onClick = { uriHandler.openUri("https://play.google.com/store/apps/details?id=${app.packageName}") },
+                    onClick = { uriHandler.openUri((if (com.charles.jurysim.BuildConfig.STORE == "direct") "https://charleshartmann.com/apps/" else "https://play.google.com/store/apps/details?id=${app.packageName}")) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
