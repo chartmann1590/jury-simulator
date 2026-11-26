@@ -83,7 +83,7 @@ fun JurySimNavGraph(
 
     LaunchedEffect(currentRoute) {
         when (currentRoute) {
-            Screen.Intro.route -> interstitialAdController.showForNewCaseIfReady()
+            Screen.Intro.route -> interstitialAdController.maybeShowDuringCase()
             Screen.VoirDire.route,
             Screen.JurySelected.route,
             Screen.Trial.route,
