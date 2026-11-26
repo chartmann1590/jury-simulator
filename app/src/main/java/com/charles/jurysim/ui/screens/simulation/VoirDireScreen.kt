@@ -18,9 +18,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import com.charles.jurysim.ui.audio.ChatTtsPlayer
 import com.charles.jurysim.ui.adaptive.AdaptiveCenteredContent
+import com.charles.jurysim.data.model.Message
 import com.charles.jurysim.ui.components.ChatBubble
 import com.charles.jurysim.ui.components.LoadingIndicator
 import com.charles.jurysim.ui.components.PhaseIndicator
+import com.charles.jurysim.ui.components.ReportContentDialog
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,12 +35,21 @@ fun VoirDireScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     var userInput by remember { mutableStateOf("") }
+    var reportTarget by remember { mutableStateOf<Message?>(null) }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val ttsPlayer = remember { ChatTtsPlayer(context) }
 
     DisposableEffect(Unit) {
         onDispose { ttsPlayer.release() }
+    }
+
+    reportTarget?.let { target ->
+        ReportContentDialog(
+            message = target,
+            onDismiss = { reportTarget = null },
+            onReport = { viewModel.reportMessage(it) }
+        )
     }
 
     LaunchedEffect(state.messages.size) {
@@ -92,7 +103,8 @@ fun VoirDireScreen(
                                 judgeGender = state.judgeGender,
                                 judgeVoiceSeed = state.judgeVoiceSeed
                             )
-                        }
+                        },
+                        onReportClick = { selected -> reportTarget = selected }
                     )
                 }
             }

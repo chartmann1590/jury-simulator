@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -26,6 +27,7 @@ class PreferencesRepository(private val context: Context) {
         val JUROR_VICTIM_KEY = stringPreferencesKey("juror_victim")
         val JUROR_POLITICAL_KEY = stringPreferencesKey("juror_political")
         val JUROR_INFO_KEY = stringPreferencesKey("juror_info")
+        val CONTENT_REPORTS_KEY = stringSetPreferencesKey("content_reports")
     }
 
     /**
@@ -57,6 +59,33 @@ class PreferencesRepository(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences.clear()
         }
+    }
+
+    /**
+     * Locally flags an AI-generated message the user reported via
+     * long-press "Report this content". Entries are stored ONLY on the
+     * device (timestamp | speaker | excerpt, newest 50 kept); the app
+     * never transmits them. The report UI additionally offers a
+     * pre-filled email so the user can choose to send a copy to the
+     * developer.
+     */
+    suspend fun recordContentReport(speaker: String, content: String) {
+        val entry = buildString {
+            append(System.currentTimeMillis())
+            append('|')
+            append(speaker.replace('|', ' ').take(48))
+            append('|')
+            append(content.replace('\n', ' ').take(280))
+        }
+        context.dataStore.edit { prefs ->
+            val existing = prefs[CONTENT_REPORTS_KEY] ?: emptySet()
+            prefs[CONTENT_REPORTS_KEY] = (existing + entry).takeLast(50).toSet()
+        }
+    }
+
+    /** All locally stored content reports, oldest first. */
+    val contentReports: Flow<List<String>> = context.dataStore.data.map { prefs ->
+        (prefs[CONTENT_REPORTS_KEY] ?: emptySet()).sorted()
     }
 
     suspend fun saveJurorProfile(

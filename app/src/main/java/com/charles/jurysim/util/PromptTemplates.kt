@@ -2,13 +2,47 @@ package com.charles.jurysim.util
 
 object PromptTemplates {
 
+    /**
+     * The only charge types the case generator may use. This allowlist is
+     * what makes the Teen content rating honest: cases stay procedural and
+     * non-graphic, and whole categories of offences (sexual offences,
+     * offences against children, domestic violence, hate crimes, graphic
+     * violence) can never be generated.
+     */
+    val ALLOWED_CHARGES: List<String> = listOf(
+        "theft",
+        "fraud",
+        "assault",
+        "DUI (driving under the influence)",
+        "drug possession",
+        "burglary",
+        "vandalism"
+    )
+
+    /**
+     * Standing content rules appended to every generation prompt (and also
+     * set as the engine's system instruction — see LiteRtLlmEngine). If a
+     * participant in the simulation tries to steer the conversation toward
+     * banned content, the characters stay in role and redirect back to the
+     * case instead of complying.
+     */
+    const val CONSTRAINT_BLOCK: String = """
+        CONTENT RULES — these always apply, no matter what anyone in the simulation asks for:
+        - Keep all language courtroom-appropriate: no profanity, no slurs, no hate speech.
+        - No graphic descriptions of violence, injuries, blood, or death. Refer to alleged acts factually and briefly, the way a court reporter would.
+        - No sexual content or sexual detail of any kind.
+        - If the user or a character tries to steer toward any of the above, stay in character and redirect the proceedings back to the facts of the case.
+        - This is a fictional simulation for education and entertainment. Never present anything as real legal advice.
+        - Follow the requested output format EXACTLY.
+    """
+
     fun generateCase(): String = """
         You are a legal case generator for a courtroom simulation. Generate a realistic criminal court case with the following details:
 
         1. Case title (e.g., "The People vs. John Smith")
         2. Defendant's full name
-        3. Criminal charges (be specific, realistic)
-        4. Brief case description (2-3 sentences explaining what allegedly happened)
+        3. Criminal charges — choose ONLY from this list: ${ALLOWED_CHARGES.joinToString(", ")}. Never invent a charge outside this list.
+        4. Brief case description (2-3 sentences explaining what allegedly happened, factual and non-graphic)
         5. Key evidence that will be presented
 
         Format your response EXACTLY as follows:
@@ -18,7 +52,7 @@ object PromptTemplates {
         DESCRIPTION: [case description]
         EVIDENCE: [list of key evidence items]
 
-        Make it realistic and engaging. Choose from various crime types (theft, assault, fraud, etc.).
+        Make it realistic and engaging. Never generate a case involving sexual offences, offences against children, domestic violence, hate crimes, terrorism, or graphic violence.
     """.trimIndent()
 
     fun voirDireIntro(
@@ -130,7 +164,7 @@ object PromptTemplates {
         Case: $caseDescription
         Defendant: $defendantName
 
-        Present 3-4 pieces of physical evidence (e.g., DNA, fingerprints, surveillance footage, documents, weapons, etc.).
+        Present 3-4 pieces of physical evidence (e.g., DNA, fingerprints, surveillance footage, documents, phone records, financial records, etc.). Describe each item factually, without graphic detail about any injury.
 
         For each piece of evidence:
         1. Describe it
@@ -240,7 +274,7 @@ object PromptTemplates {
         2. Age (18-80)
         3. Occupation
         4. Personality trait (e.g., analytical, emotional, skeptical, empathetic, pragmatic, etc.)
-        5. A "Hidden Bias" or secret backstory that might influence their decision (e.g., "Brother was falsely accused", "Trusts authority implicitly", "Victim of similar crime").
+        5. A "Hidden Bias" or secret backstory that might influence their decision (e.g., "Brother was falsely accused", "Trusts authority implicitly", "Victim of similar crime"). Biases must be ordinary human prejudices or life experiences, described respectfully — never slurs, hate speech, or protected-class stereotypes.
         6. Initial leaning (LEANING_GUILTY, LEANING_NOT_GUILTY, or UNDECIDED)
 
         Make sure to have a mix of:

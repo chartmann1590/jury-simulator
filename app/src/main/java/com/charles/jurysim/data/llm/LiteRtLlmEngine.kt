@@ -1,8 +1,12 @@
 package com.charles.jurysim.data.llm
 
+import com.charles.jurysim.util.PromptTemplates
 import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.Contents
+import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.SamplerConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -53,14 +57,40 @@ class LiteRtLlmEngine(
         val live = engine ?: error("LiteRT engine failed to initialize")
         genMutex.withLock {
             withContext(Dispatchers.Default) {
-                live.createConversation().use { convo ->
+                live.createConversation(CONVERSATION_CONFIG).use { convo ->
                     // The Message API doesn't expose a stable `.text` field
                     // across versions; toString() is documented to return
                     // the text content for text-only conversations.
                     convo.sendMessage(prompt).toString()
+                        // LiteRT-LM 0.11 exposes no per-conversation output
+                        // token cap, so enforce a hard output length here.
+                        .take(MAX_OUTPUT_CHARS)
                 }
             }
         }
+    }
+
+    companion object {
+        /**
+         * Hard cap on generated output length (~2,500 tokens at typical
+         * density — far longer than any single simulation response needs).
+         */
+        const val MAX_OUTPUT_CHARS: Int = 10_000
+
+        /**
+         * Every conversation runs with the standing content rules as its
+         * system instruction and with explicit sampler limits (temperature
+         * 0.7 / topK 40 / topP 0.9) instead of runtime defaults, keeping
+         * generation focused and courtroom-appropriate.
+         */
+        val CONVERSATION_CONFIG: ConversationConfig = ConversationConfig(
+            systemInstruction = Contents.of(PromptTemplates.CONSTRAINT_BLOCK),
+            samplerConfig = SamplerConfig(
+                topK = 40,
+                topP = 0.9,
+                temperature = 0.7
+            )
+        )
     }
 
     override fun close() {

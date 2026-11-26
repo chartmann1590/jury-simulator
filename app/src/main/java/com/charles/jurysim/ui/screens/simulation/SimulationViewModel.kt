@@ -13,6 +13,7 @@ import com.charles.jurysim.data.llm.LlmEngine
 import com.charles.jurysim.data.repository.CaseHistoryRepository
 import com.charles.jurysim.data.repository.PreferencesRepository
 import com.charles.jurysim.util.Constants
+import com.charles.jurysim.util.ContentFilter
 import com.charles.jurysim.util.PromptTemplates
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,6 +51,37 @@ class SimulationViewModel(
         }
     }
 
+    /**
+     * Single choke point for ALL model generation in the simulation.
+     *
+     * 1. Appends [PromptTemplates.CONSTRAINT_BLOCK] to the prompt (the
+     *    engine also carries the same rules as its system instruction).
+     * 2. Runs the raw output through [ContentFilter.sanitize] so slurs
+     *    and strong profanity can never reach the UI, case history, or
+     *    TTS — even if the model ignores its instructions.
+     */
+    private suspend fun generateChecked(prompt: String): Result<String> {
+        val constrained = prompt.trimEnd() + "\n\n" + PromptTemplates.CONSTRAINT_BLOCK
+        return llmEngine.generate(constrained).mapCatching { raw ->
+            ContentFilter.sanitize(raw)
+        }
+    }
+
+    /**
+     * Records a user report against an AI-generated [message] (long-press
+     * "Report this content" in the chat UI). The flag is stored locally
+     * in DataStore; nothing is transmitted by the app itself. The UI also
+     * offers a pre-filled email to the developer after reporting.
+     */
+    fun reportMessage(message: Message) {
+        viewModelScope.launch {
+            preferencesRepository.recordContentReport(
+                speaker = message.speaker ?: "AI",
+                content = message.content
+            )
+        }
+    }
+
     fun initialize() {
         viewModelScope.launch {
             jurorProfile = preferencesRepository.getJurorProfile()
@@ -68,7 +100,7 @@ class SimulationViewModel(
         )
 
         val prompt = PromptTemplates.generateCase()
-        val result = llmEngine.generate(prompt)
+        val result = generateChecked(prompt)
 
         result.onSuccess { response ->
             parseCase(response)
@@ -116,7 +148,7 @@ class SimulationViewModel(
                 hasLegalExperience = profile.hasLegalExperience
             )
 
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -161,7 +193,7 @@ class SimulationViewModel(
                 previousConversation = conversation,
                 judgeName = getJudgeName()
             )
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -244,8 +276,8 @@ class SimulationViewModel(
 
             try {
                 // Run generations in parallel to save time
-                val prosecutionDeferred = async { llmEngine.generate(prosecutionPrompt) }
-                val defenseDeferred = async { llmEngine.generate(defensePrompt) }
+                val prosecutionDeferred = async { generateChecked(prosecutionPrompt) }
+                val defenseDeferred = async { generateChecked(defensePrompt) }
 
                 val prosecutionResult = prosecutionDeferred.await()
                 val defenseResult = defenseDeferred.await()
@@ -317,7 +349,7 @@ class SimulationViewModel(
             defendantName = _state.value.defendantName
         )
 
-        val result = llmEngine.generate(prompt)
+        val result = generateChecked(prompt)
 
         result.onSuccess { response ->
             val witnessName = response.substringAfter("WITNESS:").substringBefore("TESTIMONY:").trim()
@@ -363,7 +395,7 @@ class SimulationViewModel(
                 defendantName = _state.value.defendantName
             )
 
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -412,8 +444,8 @@ class SimulationViewModel(
 
             try {
                 // Run generations in parallel
-                val prosecutionDeferred = async { llmEngine.generate(prosecutionPrompt) }
-                val defenseDeferred = async { llmEngine.generate(defensePrompt) }
+                val prosecutionDeferred = async { generateChecked(prosecutionPrompt) }
+                val defenseDeferred = async { generateChecked(defensePrompt) }
 
                 val prosecutionResult = prosecutionDeferred.await()
                 val defenseResult = defenseDeferred.await()
@@ -464,7 +496,7 @@ class SimulationViewModel(
                 jurors = _state.value.aiJurors
             )
 
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -502,7 +534,7 @@ class SimulationViewModel(
                 userInput = userInput,
                 jurors = _state.value.aiJurors
             )
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val message = Message(
@@ -541,7 +573,7 @@ class SimulationViewModel(
             }
 
             val prompt = PromptTemplates.finalVerdict(conversation)
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val verdict = if (response.contains("VERDICT: GUILTY", ignoreCase = true)) {
@@ -642,7 +674,7 @@ class SimulationViewModel(
             _state.value = _state.value.copy(isLoading = true)
 
             val prompt = PromptTemplates.generateAIJurors()
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val jurors = parseJurors(response)
@@ -698,7 +730,7 @@ class SimulationViewModel(
                 userInput = userInput
             )
 
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val jurorMessage = Message(
@@ -756,7 +788,7 @@ class SimulationViewModel(
                 votingRound = _state.value.currentVotingRound
             )
 
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
             result.onSuccess { response ->
                 val vote = if (response.contains("VOTE: GUILTY", ignoreCase = true) &&
                               !response.contains("NOT_GUILTY", ignoreCase = true) &&
@@ -858,7 +890,7 @@ class SimulationViewModel(
                 judgeName = getJudgeName()
             )
 
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 val mistrialMessage = Message(
@@ -922,7 +954,7 @@ class SimulationViewModel(
                 evidencePresented = evidenceText
             )
 
-            val result = llmEngine.generate(prompt)
+            val result = generateChecked(prompt)
 
             result.onSuccess { response ->
                 _state.value = _state.value.copy(
@@ -974,7 +1006,7 @@ class SimulationViewModel(
                 judgeName = getJudgeName()
             )
 
-            val judgeResult = llmEngine.generate(judgePrompt)
+            val judgeResult = generateChecked(judgePrompt)
             
             val judgeResponse = judgeResult.getOrElse {
                 _state.value = _state.value.copy(
@@ -1004,7 +1036,7 @@ class SimulationViewModel(
                     question = question
                 )
 
-                val witnessResult = llmEngine.generate(witnessPrompt)
+                val witnessResult = generateChecked(witnessPrompt)
                 
                 witnessResult.onSuccess { witnessResponse ->
                      val witnessMessage = Message(
