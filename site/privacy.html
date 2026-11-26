@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-N9CJGFD7C4"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-N9CJGFD7C4');
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Privacy Policy · Jury Simulator</title>
@@ -41,7 +33,7 @@
     <div class="container">
       <p class="eyebrow">Privacy Policy</p>
       <h1>What Jury Simulator does — and doesn't — collect.</h1>
-      <p class="effective">Effective 7 May 2026 · Last updated 7 May 2026</p>
+      <p class="effective">Effective 7 May 2026 · Last updated 26 November 2026</p>
 
       <p class="lede">Jury Simulator runs trials on your device. Most of what you do in the app — your voir dire answers, the conversations you have with jurors, your notes, your votes — never leaves your phone. This page explains the few exceptions and exactly what happens to that data.</p>
 
@@ -50,28 +42,33 @@
       <ul>
         <li>Anything you type to a juror or write in your notebook is processed on the same phone you typed it on.</li>
         <li>Your case history and verdicts are stored in a private local database that other apps cannot read.</li>
+        <li>Your juror profile (including the optional political-leaning field) is stored only on your device.</li>
         <li>We do not have a server that holds your gameplay. There is nothing for us to leak, sell, or be subpoenaed for.</li>
+        <li>Android backup is disabled for this app, so your local data is not copied to cloud backups either.</li>
       </ul>
+      <p>All cases, people, and verdicts in the app are AI-generated fiction. If an AI message ever concerns you, you can long-press it in the app and choose <em>Report this content</em>.</p>
 
       <h2>What does leave your device</h2>
 
       <h3>Model download</h3>
-      <p>On first launch the app downloads the AI model (~3.65 GB) over HTTPS from a public model host (Google AI Edge). This is a one-time download. We do not run a server in the middle — the request goes directly from your device to the host.</p>
+      <p>On first launch the app downloads the AI model (~3.65 GB) over HTTPS from <strong>Hugging Face</strong>, which hosts the model file (the Gemma 4 E4B IT LiteRT-LM build published by the litert-community project). This is a one-time download. We do not run a server in the middle — the request goes directly from your device to Hugging Face, which, like any web host, can see your IP address when you download. The download runs as a foreground service with a progress notification so it can finish even if you leave the app, and the app verifies the downloaded file's cryptographic hash (SHA-256) before using it. If you choose to supply your own model URL in the app, the download goes to that host instead, under the same rules.</p>
 
       <h3>AdMob ads</h3>
-      <p>The app shows banner and occasional interstitial ads via Google AdMob to cover hosting costs. AdMob may collect:</p>
+      <p>The app shows banner and occasional interstitial ads via Google AdMob, which supports development of the app. The Google Mobile Ads SDK may collect:</p>
       <ul>
-        <li>Your advertising ID (resettable in Android settings)</li>
-        <li>Approximate location (country level, derived from your IP)</li>
-        <li>Device model, OS version, language, and similar non-identifying technical data</li>
+        <li>Your advertising ID and app set ID (the advertising ID is resettable in Android settings)</li>
+        <li>Approximate location (derived from your IP address)</li>
+        <li>App interactions (such as ad impressions and taps) and basic product-interaction events</li>
+        <li>Diagnostics, such as crash logs and app performance data</li>
+        <li>Device model, OS version, language, and similar technical data</li>
       </ul>
-      <p>This data is governed by <a href="https://policies.google.com/technologies/ads">Google's Ads &amp; Privacy Policy</a>. You can limit personalized ads at any time in your Android device settings under <em>Privacy → Ads → Reset advertising ID</em> or <em>Opt out of Ads Personalization</em>. Jury Simulator will keep working — you'll just see less-relevant ads.</p>
+      <p>Google uses this data for advertising, analytics, and fraud prevention, as described in <a href="https://policies.google.com/technologies/ads">Google's Ads &amp; Privacy Policy</a> and Google's <a href="https://developers.google.com/admob/android/privacy">AdMob data disclosure</a>. Where the law requires it, the app asks for your consent before ads are requested. You can also limit personalized ads at any time in your Android device settings under <em>Privacy → Ads → Reset advertising ID</em> or <em>Delete advertising ID</em>. Jury Simulator will keep working — you'll just see less-relevant ads.</p>
 
       <h2>What we don't do</h2>
       <ul>
-        <li>No third-party analytics. No Firebase, no Crashlytics, no Mixpanel, no Amplitude.</li>
+        <li>No third-party analytics of our own. No Firebase, no Crashlytics, no Mixpanel, no Amplitude — and this page itself loads no analytics trackers.</li>
         <li>No account system. We don't ask you to sign up, sign in, or hand over an email.</li>
-        <li>No cross-app tracking. The only third party that sees anything is AdMob, and AdMob only sees ad-serving data — not your gameplay or notes.</li>
+        <li>No cross-app tracking by us. The only third parties involved are Hugging Face (the one-time model download) and Google AdMob (ads) — and neither sees your gameplay, chats, or notes, which never leave your device.</li>
       </ul>
 
       <h2>Children</h2>
@@ -80,7 +77,7 @@
       <h2>Permissions, in plain language</h2>
       <ul>
         <li><strong>Internet &amp; network state</strong> — to download the model and load ads.</li>
-        <li><strong>Foreground service &amp; notifications</strong> — to keep the model download running with a progress notification, then notify you when it finishes.</li>
+        <li><strong>Foreground service &amp; notifications</strong> — the one-time model download runs as a foreground service (type: data sync) with a progress notification, so it can complete even if you leave the app.</li>
       </ul>
 
       <h2>Changes to this policy</h2>
