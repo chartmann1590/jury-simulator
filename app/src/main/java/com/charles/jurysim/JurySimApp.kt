@@ -1,7 +1,6 @@
 package com.charles.jurysim
 
 import android.app.Application
-import com.google.android.gms.ads.MobileAds
 import com.charles.jurysim.data.llm.LlmEngineProvider
 import com.charles.jurysim.data.llm.ModelDownloader
 import com.charles.jurysim.data.llm.ModelManager
@@ -32,7 +31,10 @@ class JurySimApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        MobileAds.initialize(this)
+        // NOTE: MobileAds is intentionally NOT initialized here. Google
+        // Play requires the UMP consent flow to run first; MainActivity
+        // drives it via ConsentManager, which initializes the ads SDK
+        // only once consent allows ad requests.
         modelManager = ModelManager(this)
         llmEngineProvider = LlmEngineProvider(modelManager)
         modelDownloader = ModelDownloader(modelManager)

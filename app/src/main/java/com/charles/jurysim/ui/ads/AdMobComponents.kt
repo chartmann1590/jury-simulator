@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
@@ -26,6 +28,11 @@ import kotlin.random.Random
 
 @Composable
 fun GlobalBannerAd(modifier: Modifier = Modifier) {
+    // Consent gate: no ad view is created (and no ad requested) until
+    // the UMP flow in ConsentManager allows ad requests.
+    val canRequestAds by ConsentManager.canRequestAds.collectAsState()
+    if (!canRequestAds) return
+
     val context = androidx.compose.ui.platform.LocalContext.current
     val density = LocalDensity.current
 
@@ -71,6 +78,7 @@ class InterstitialAdController(private val context: Context) {
     private var lastShownAtMs: Long = 0L
 
     fun preload() {
+        if (!ConsentManager.canRequestAds.value) return
         if (interstitialAd != null) return
         InterstitialAd.load(
             context,
@@ -86,10 +94,6 @@ class InterstitialAdController(private val context: Context) {
                 }
             }
         )
-    }
-
-    fun showForNewCaseIfReady() {
-        showInternal(forceShow = true)
     }
 
     fun maybeShowDuringCase() {

@@ -169,6 +169,9 @@ dependencies {
     // Core
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("com.google.android.gms:play-services-ads:25.2.0")
+    // Google UMP consent (pairs with play-services-ads 25.x) — consent
+    // must complete before MobileAds initializes; see ConsentManager.
+    implementation("com.google.android.ump:user-messaging-platform:2.2.0")
     implementation("com.google.android.play:review-ktx:2.0.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 

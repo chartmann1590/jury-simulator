@@ -12,6 +12,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.Modifier
 import com.charles.jurysim.data.repository.PreferencesRepository
 import com.charles.jurysim.ui.adaptive.mapWidthSizeClass
+import com.charles.jurysim.ui.ads.ConsentManager
 import com.charles.jurysim.ui.navigation.Screen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -21,6 +22,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // UMP consent first: this shows the consent form if required and
+        // initializes MobileAds only once ads may be requested.
+        ConsentManager.requestConsentAndInitAds(this)
 
         // Resolve the start destination synchronously from DataStore. This is
         // a one-shot read on the splash frame; for a single Boolean key it's
