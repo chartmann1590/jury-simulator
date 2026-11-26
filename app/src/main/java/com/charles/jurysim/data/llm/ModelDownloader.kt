@@ -15,7 +15,14 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Streams the LiteRT-LM model file to disk with HTTP `Range` resume support
- * and progress reporting. Verifies SHA-256 if a non-empty hash is configured.
+ * and progress reporting.
+ *
+ * Integrity verification is MANDATORY and fails closed:
+ * - The default (pinned) model must match the exact expected size AND
+ *   SHA-256 from [Constants]; any mismatch deletes the download.
+ * - A user-supplied custom model cannot be hash-checked against a known
+ *   value, so it must at least clear a size sanity floor (and later, a
+ *   successful engine load in onboarding).
  *
  * The download writes to `<model>.litertlm.part`; only on a successful verify
  * is it atomically renamed to its final filename. This way an interrupted
@@ -135,12 +142,39 @@ class ModelDownloader(private val modelManager: ModelManager) {
 
         emit(DownloadState.Verifying)
 
-        val expectedSha = Constants.LITERTLM_MODEL_SHA256.trim()
-        if (expectedSha.isNotEmpty()) {
+        // Fail-closed integrity verification. There is no configuration
+        // in which an unverified file is accepted.
+        val isDefaultModel = url == Constants.LITERTLM_MODEL_URL
+        if (isDefaultModel) {
+            val expectedSha = Constants.LITERTLM_MODEL_SHA256.trim()
+            if (expectedSha.isEmpty()) {
+                modelManager.partFile.delete()
+                emit(
+                    DownloadState.Failed(
+                        "Model integrity check is not configured in this build.",
+                        retryable = false
+                    )
+                )
+                return@flow
+            }
+            if (modelManager.partFile.length() != Constants.LITERTLM_MODEL_SIZE_BYTES) {
+                modelManager.partFile.delete()
+                emit(DownloadState.Failed("Model download is incomplete or corrupt (unexpected size)."))
+                return@flow
+            }
             val actual = sha256(modelManager.partFile)
             if (!actual.equals(expectedSha, ignoreCase = true)) {
                 modelManager.partFile.delete()
                 emit(DownloadState.Failed("Model integrity check failed (SHA-256 mismatch)."))
+                return@flow
+            }
+        } else {
+            // Custom model: no known-good hash exists. Require a
+            // plausible model size; the engine-load step in onboarding
+            // is the second gate (an unusable file is deleted there).
+            if (modelManager.partFile.length() < Constants.CUSTOM_MODEL_MIN_SIZE_BYTES) {
+                modelManager.partFile.delete()
+                emit(DownloadState.Failed("Downloaded file is too small to be a LiteRT-LM model."))
                 return@flow
             }
         }
@@ -151,6 +185,7 @@ class ModelDownloader(private val modelManager: ModelManager) {
             emit(DownloadState.Failed("Failed to finalize model file."))
             return@flow
         }
+        modelManager.recordSource(url)
 
         emit(DownloadState.Ready)
     }.flowOn(Dispatchers.IO)

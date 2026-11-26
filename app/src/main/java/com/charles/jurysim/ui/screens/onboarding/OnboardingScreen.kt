@@ -1,5 +1,10 @@
 package com.charles.jurysim.ui.screens.onboarding
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,9 +18,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.charles.jurysim.data.llm.DownloadState
 import com.charles.jurysim.ui.adaptive.AdaptiveCenteredContent
 import com.charles.jurysim.util.Constants
@@ -29,6 +36,26 @@ fun OnboardingScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var showCustomUrlDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // The download runs as a foreground service with a progress
+    // notification; on Android 13+ that needs POST_NOTIFICATIONS.
+    // Ask once when the user starts a download — the download itself
+    // proceeds either way (the notification is simply hidden if denied).
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* result intentionally ignored */ }
+    val withNotificationPermission: (() -> Unit) -> Unit = { action ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        action()
+    }
 
     LaunchedEffect(state.download) {
         if (state.download is DownloadState.Ready) onReady()
@@ -64,7 +91,7 @@ fun OnboardingScreen(
                 when (val s = state.download) {
                     DownloadState.Idle -> WelcomeActions(
                         state = state,
-                        onDownload = viewModel::startDownload,
+                        onDownload = { withNotificationPermission { viewModel.startDownload() } },
                         onCustomUrl = { showCustomUrlDialog = true }
                     )
                     DownloadState.Connecting -> StatusBlock(
@@ -90,7 +117,7 @@ fun OnboardingScreen(
                     )
                     is DownloadState.Failed -> FailedBlock(
                         state = s,
-                        onRetry = viewModel::retry,
+                        onRetry = { withNotificationPermission { viewModel.retry() } },
                         onCustomUrl = { showCustomUrlDialog = true }
                     )
                 }
@@ -101,10 +128,12 @@ fun OnboardingScreen(
     if (showCustomUrlDialog) {
         CustomUrlDialog(
             initial = state.customUrl ?: "",
+            errorText = state.customUrlError,
             onDismiss = { showCustomUrlDialog = false },
             onConfirm = { url ->
-                viewModel.useCustomUrl(url)
-                showCustomUrlDialog = false
+                if (viewModel.useCustomUrl(url)) {
+                    showCustomUrlDialog = false
+                }
             }
         )
     }
@@ -147,6 +176,13 @@ private fun HeaderCard() {
             Text(
                 text = "Download size: ~3.65 GB · Apache 2.0 · Hugging Face mirror",
                 style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = Constants.LEGAL_DISCLAIMER,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
@@ -372,6 +408,7 @@ private fun FailedBlock(
 @Composable
 private fun CustomUrlDialog(
     initial: String,
+    errorText: String?,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
@@ -383,7 +420,8 @@ private fun CustomUrlDialog(
             Column {
                 Text(
                     "Paste a direct HTTPS link to a Gemma 4 .litertlm file. " +
-                            "Useful for self-hosted mirrors or air-gapped sideloads.",
+                            "Useful for self-hosted mirrors or air-gapped sideloads. " +
+                            "Only HTTPS links to a .litertlm file are accepted.",
                     style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(Modifier.height(12.dp))
@@ -392,6 +430,12 @@ private fun CustomUrlDialog(
                     onValueChange = { text = it },
                     label = { Text("https://…/model.litertlm") },
                     singleLine = true,
+                    isError = errorText != null,
+                    supportingText = {
+                        if (errorText != null) {
+                            Text(errorText, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
