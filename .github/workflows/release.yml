@@ -82,19 +82,19 @@ jobs:
       - name: Compute version
         id: version
         run: |
-          # versionCode must strictly increase on every run, INCLUDING re-runs of
-          # the same workflow run. github.run_number stays the same on rerun, so
-          # we combine it with github.run_attempt: code = run_number*100 + attempt.
-          # This keeps codes monotonically increasing while leaving plenty of
-          # headroom (up to 99 attempts per run before the next push overruns).
-          RUN_NUMBER=${{ github.run_number }}
-          RUN_ATTEMPT=${{ github.run_attempt }}
-          VERSION_CODE=$((RUN_NUMBER * 100 + RUN_ATTEMPT))
-          if [ "$RUN_ATTEMPT" = "1" ]; then
-            VERSION_NAME="1.0.$RUN_NUMBER"
-          else
-            VERSION_NAME="1.0.$RUN_NUMBER.$RUN_ATTEMPT"
-          fi
+          # ONE versionCode scheme across both workflows: timestamp-based
+          # (yy + day-of-year + HHMM, UTC) — identical to
+          # publish-google-play.yml. The old run_number*100+attempt scheme
+          # produced codes in the low thousands, far below the codes Play
+          # already has (live: 1501; staged/publish builds: ~263 million),
+          # so an AAB built here could never be uploaded to Play. With the
+          # shared timestamp scheme every build's code is globally
+          # monotonic and any AAB from either workflow is Play-uploadable.
+          # (Two builds started in the same minute share a code — the
+          # publish workflow is manually dispatched, so this cannot
+          # collide with a staged Play release in practice.)
+          VERSION_CODE=$(date -u +'%y%j%H%M')
+          VERSION_NAME="1.0.$(date -u +'%Y%m%d.%H%M')"
           echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
           echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION_NAME" >> "$GITHUB_OUTPUT"
