@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.charles.jurysim.data.model.Message
 import com.charles.jurysim.data.model.TrialPhase
 import com.charles.jurysim.ui.audio.ChatTtsPlayer
 import com.charles.jurysim.ui.adaptive.AdaptiveCenteredContent
@@ -20,6 +21,7 @@ import com.charles.jurysim.ui.components.ChatBubble
 import com.charles.jurysim.ui.components.LoadingIndicator
 import com.charles.jurysim.ui.components.NotebookScreen
 import com.charles.jurysim.ui.components.PhaseIndicator
+import com.charles.jurysim.ui.components.ReportContentDialog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -34,9 +36,18 @@ fun TrialScreen(
     val ttsPlayer = remember { ChatTtsPlayer(context) }
     var showQuestionDialog by remember { mutableStateOf(false) }
     var questionInput by remember { mutableStateOf("") }
+    var reportTarget by remember { mutableStateOf<Message?>(null) }
 
     DisposableEffect(Unit) {
         onDispose { ttsPlayer.release() }
+    }
+
+    reportTarget?.let { target ->
+        ReportContentDialog(
+            message = target,
+            onDismiss = { reportTarget = null },
+            onReport = { viewModel.reportMessage(it) }
+        )
     }
 
     LaunchedEffect(state.messages.size) {
@@ -97,7 +108,8 @@ fun TrialScreen(
                                     judgeGender = state.judgeGender,
                                     judgeVoiceSeed = state.judgeVoiceSeed
                                 )
-                            }
+                            },
+                            onReportClick = { selected -> reportTarget = selected }
                         )
                     }
 
