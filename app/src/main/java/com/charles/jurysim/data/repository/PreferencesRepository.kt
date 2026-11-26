@@ -79,7 +79,7 @@ class PreferencesRepository(private val context: Context) {
         }
         context.dataStore.edit { prefs ->
             val existing = prefs[CONTENT_REPORTS_KEY] ?: emptySet()
-            prefs[CONTENT_REPORTS_KEY] = (existing + entry).takeLast(50).toSet()
+            prefs[CONTENT_REPORTS_KEY] = (existing + entry).toList().takeLast(50).toSet()
         }
     }
 
