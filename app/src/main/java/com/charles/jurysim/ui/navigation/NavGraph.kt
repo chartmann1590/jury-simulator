@@ -57,7 +57,6 @@ fun JurySimNavGraph(
 
     // Application-scoped singletons
     val modelManager = app.modelManager
-    val modelDownloader = app.modelDownloader
     val llmEngineProvider = app.llmEngineProvider
     val llmEngine = remember { llmEngineProvider.get() }
     val preferencesRepository = remember { PreferencesRepository(context) }
@@ -103,7 +102,6 @@ fun JurySimNavGraph(
                         OnboardingViewModel(
                             application = app,
                             modelManager = modelManager,
-                            modelDownloader = modelDownloader,
                             llmEngineProvider = llmEngineProvider,
                             preferencesRepository = preferencesRepository
                         )

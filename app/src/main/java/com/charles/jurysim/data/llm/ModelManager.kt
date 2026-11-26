@@ -22,15 +22,42 @@ class ModelManager(context: Context) {
     /** Partial download lives here until verification succeeds. */
     val partFile: File = File(modelsDir, "${Constants.LITERTLM_MODEL_FILENAME}.part")
 
+    /** Records which URL the on-disk model came from (default vs custom). */
+    private val sourceMarkerFile: File = File(modelsDir, "model-source.txt")
+
+    /** The URL the current on-disk model was downloaded from, if known. */
+    fun sourceUrl(): String? =
+        if (sourceMarkerFile.exists()) {
+            sourceMarkerFile.readText().trim().ifEmpty { null }
+        } else {
+            null
+        }
+
+    /** Persists [url] as the source of the on-disk model. Called only
+     *  after a download has passed verification. */
+    fun recordSource(url: String) {
+        sourceMarkerFile.writeText(url)
+    }
+
     /**
-     * Returns true if the fully-downloaded model file exists and has a
-     * plausible size. We don't enforce an exact byte count because the HF
-     * canonical filename / size could shift across model card revisions.
+     * Returns true if the fully-downloaded model file exists and is the
+     * file we expect:
+     * - Default model: EXACT byte-for-byte size match against the pinned
+     *   revision (the SHA-256 was already verified at download time).
+     * - Custom model (user-supplied URL): at least the sanity floor —
+     *   there is no known-good size/hash for arbitrary user models.
+     * - Legacy installs with no source marker: exact size match, since
+     *   only the default model was ever shipped to them.
      */
     fun isModelDownloaded(): Boolean {
         if (!modelFile.exists()) return false
-        // Sanity check: at least 1 GB. Anything smaller is corrupt / aborted.
-        return modelFile.length() >= 1_000_000_000L
+        val size = modelFile.length()
+        val source = sourceUrl()
+        return if (source == null || source == Constants.LITERTLM_MODEL_URL) {
+            size == Constants.LITERTLM_MODEL_SIZE_BYTES
+        } else {
+            size >= Constants.CUSTOM_MODEL_MIN_SIZE_BYTES
+        }
     }
 
     fun modelSizeOnDiskBytes(): Long = if (modelFile.exists()) modelFile.length() else 0L
@@ -48,10 +75,11 @@ class ModelManager(context: Context) {
         return (Constants.LITERTLM_MODEL_SIZE_BYTES - have).coerceAtLeast(0L)
     }
 
-    /** Removes both the finished and partial files. */
+    /** Removes the finished file, the partial file, and the source marker. */
     fun deleteAll() {
         if (modelFile.exists()) modelFile.delete()
         if (partFile.exists()) partFile.delete()
+        if (sourceMarkerFile.exists()) sourceMarkerFile.delete()
     }
 
     fun modelPath(): String = modelFile.absolutePath

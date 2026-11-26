@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Jury Simulator stores everything locally (case history in Room, juror
+  profile + settings in DataStore) and the privacy policy states that
+  data never leaves the device. Exclude every domain from both cloud
+  backup and device-to-device transfer so that promise holds even
+  though the platform backup transports exist. (android:allowBackup is
+  also false; this is defense in depth.)
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>
