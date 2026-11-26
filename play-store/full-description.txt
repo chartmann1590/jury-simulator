@@ -1,6 +1,6 @@
 What would you decide if justice depended on your vote?
 
-Jury Simulator puts you in the jury box for AI-generated criminal trials. Move through the full process: voir dire (jury selection), opening statements, witness testimony, evidence review, closing arguments, deliberation, and final verdict. Every case is generated fresh — different defendant, different charges, different witnesses — so no two sessions are alike.
+Jury Simulator puts you in the jury box for AI-generated criminal trials. Move through the full process: voir dire (jury selection), opening statements, witness testimony, evidence review, closing arguments, deliberation, and final verdict. Cases are generated on-device and can differ every session — different defendant, different charges, different witnesses.
 
 Why people play Jury Simulator:
 
@@ -15,15 +15,17 @@ Why people play Jury Simulator:
 How a session goes:
 
 1) Start a new case. Read the charges.
-2) Pass voir dire — answer the judge's questions and hope the prosecution doesn't strike you.
+2) Pass voir dire — answer the judge's questions while the judge rules on strikes from both sides.
 3) Sit through the trial: opening, witnesses (you can question them), evidence review, closing.
 4) Walk into the jury room. Talk to all eleven jurors at once, or pull one aside.
 5) Vote. If you're not unanimous after five rounds, the judge declares a mistrial.
 
-Runs on your device. After a one-time AI model download, every trial is generated locally — no account, no cloud, no server holding your gameplay. Your notes and votes never leave your phone.
+Runs on your device. After a one-time AI model download (about 3.65 GB — download it on Wi-Fi), every trial is generated locally — no account, no cloud, no server holding your gameplay. Your notes and votes never leave your phone.
 
 Designed for legal-curious folks, debate enthusiasts, students of evidence and reasoning, and anyone who has wondered how juries actually decide things.
 
-Free to play. A small banner ad and an occasional interstitial cover the hosting bill — no paywall, no subscription.
+Free to play. A small banner ad and an occasional interstitial support development — no paywall, no subscription, no in-app purchases.
 
 Take your seat in the jury box.
+
+Jury Simulator is a work of fiction for entertainment and education. All cases, people and verdicts are AI-generated and fictional. It is not legal advice and does not simulate any real case or court.

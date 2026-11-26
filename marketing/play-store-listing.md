@@ -1,5 +1,11 @@
 # Play Store Listing - Jury Simulator
 
+> **DEPRECATED — do not use.** This draft contains claims that are not
+> true of the shipped app (e.g. "adjustable AI settings" — no such
+> setting exists) and an over-length short description. The canonical
+> listing copy lives in `play-store/` (`full-description.txt`,
+> `short-description.txt`, `app-title.txt`). Kept for history only.
+
 ## App Title (<= 30 chars)
 Jury Simulator: Trial Verdict
 
