@@ -55,6 +55,15 @@ android {
         buildConfigField("String", "ADMOB_BANNER_ID", "\"$admobBannerId\"")
         buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"$admobInterstitialId\"")
 
+        ndk {
+            // 64-bit ABIs only. LiteRT-LM ships no 32-bit native library,
+            // so on armeabi-v7a / x86 devices the model engine can never
+            // load. Filtering here also strips the stray 32-bit
+            // libandroidx.graphics.path.so that would otherwise make Play
+            // treat the app as 32-bit-compatible and serve it to devices
+            // where model setup can never succeed.
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
         vectorDrawables {
             useSupportLibrary = true
         }
