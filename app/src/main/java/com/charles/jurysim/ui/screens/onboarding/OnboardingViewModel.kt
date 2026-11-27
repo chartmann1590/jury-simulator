@@ -171,6 +171,7 @@ class OnboardingViewModel(
             WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED -> DownloadState.Connecting
             WorkInfo.State.RUNNING -> {
                 val downloaded = info.progress.getLong(ModelDownloadWorker.KEY_BYTES_DOWNLOADED, 0L)
+                val bytesPerSec = info.progress.getLong(ModelDownloadWorker.KEY_BYTES_PER_SEC, 0L)
                 val total = info.progress.getLong(
                     ModelDownloadWorker.KEY_TOTAL_BYTES,
                     Constants.LITERTLM_MODEL_SIZE_BYTES
@@ -183,7 +184,7 @@ class OnboardingViewModel(
                     DownloadState.Downloading(
                         bytesDownloaded = downloaded,
                         totalBytes = total,
-                        bytesPerSec = 0L
+                        bytesPerSec = bytesPerSec
                     )
                 }
             }

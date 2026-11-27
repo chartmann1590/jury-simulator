@@ -23,7 +23,7 @@ import com.charles.jurysim.util.Constants
  * reclaimed, instead of dying with a viewModelScope coroutine.
  *
  * Progress is published through WorkManager progress data
- * ([KEY_BYTES_DOWNLOADED] / [KEY_TOTAL_BYTES]); the onboarding UI
+ * ([KEY_BYTES_DOWNLOADED] / [KEY_TOTAL_BYTES] / [KEY_BYTES_PER_SEC]); the onboarding UI
  * observes the unique work and maps it back onto [DownloadState].
  */
 class ModelDownloadWorker(
@@ -50,6 +50,7 @@ class ModelDownloadWorker(
                         Data.Builder()
                             .putLong(KEY_BYTES_DOWNLOADED, state.bytesDownloaded)
                             .putLong(KEY_TOTAL_BYTES, state.totalBytes)
+                            .putLong(KEY_BYTES_PER_SEC, state.bytesPerSec)
                             .build()
                     )
                     if (percent != lastPercent) {
@@ -125,6 +126,7 @@ class ModelDownloadWorker(
         const val KEY_URL = "url"
         const val KEY_BYTES_DOWNLOADED = "bytes_downloaded"
         const val KEY_TOTAL_BYTES = "total_bytes"
+        const val KEY_BYTES_PER_SEC = "bytes_per_sec"
         const val KEY_ERROR = "error"
 
         private const val CHANNEL_ID = "model_download"
